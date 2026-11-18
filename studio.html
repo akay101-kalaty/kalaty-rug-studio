@@ -369,6 +369,7 @@
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="ars-colors.js"></script>
 <script src="rugs.js"></script>
 <script>
@@ -812,15 +813,62 @@ function doSave(){
   const size=document.getElementById('rugSize').value.trim();
   const res=document.getElementById('saveResult');
   if(!name){ res.innerHTML='<div class="saveerr">Please enter a customer name.</div>'; return; }
+  const JS = window.jspdf && window.jspdf.jsPDF;
+  if(!JS){ res.innerHTML='<div class="saveerr">The PDF library did not load — check your connection and try again.</div>'; return; }
   const rug=window.RUGS[currentRug];
-  const rec={
-    savedAt:new Date().toISOString(), customer:name, size:size||null,
-    design:rug.code, collection:rug.collection,
-    yarns: clusters.filter(c=>!c.isBg && !c.hidden).map(c=>({code:'KAL-'+c.kal, color:hex(curRgb(c)), ars:c.ars?c.ars.n:null, changed:!!c.editedFlag}))
-  };
-  try{ const k='kalaty-custom-rugs'; const all=JSON.parse(localStorage.getItem(k)||'[]'); all.push(rec); localStorage.setItem(k,JSON.stringify(all)); }catch(e){}
-  res.innerHTML='<div class="savedmsg">✓ Saved for '+name+(size?(' · '+size):'')+'.</div>'
-    +'<div class="note" style="border:none;background:none;padding:6px 0 0">Prototype: stored in this browser only. A production version would send this custom-rug request to Kalaty with the design #, size and chosen colors.</div>';
+  const yarns=clusters.filter(c=>!c.isBg && !c.hidden);
+  res.innerHTML='<div class="savedmsg">Generating PDF…</div>';
+  try{
+    const doc=new JS({unit:'mm', format:'a4'});
+    const M=15, PW=210, teal=[0,97,136], ink=[32,48,58], muted=[94,114,125];
+    const tc=a=>doc.setTextColor(a[0],a[1],a[2]);
+
+    const logoEl=document.querySelector('.brand .logo');
+    try{ if(logoEl && logoEl.complete && logoEl.naturalWidth) doc.addImage(logoEl,'JPEG',M,13,42,42*(logoEl.naturalHeight/logoEl.naturalWidth)); }catch(e){}
+    doc.setFont('helvetica','bold'); doc.setFontSize(15); tc(ink);
+    doc.text('Custom Rug Specification', PW-M, 22, {align:'right'});
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); tc(muted);
+    doc.text(new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}), PW-M, 28, {align:'right'});
+    doc.setDrawColor(228,232,234); doc.line(M,36,PW-M,36);
+
+    let y=46; doc.setFontSize(10);
+    const row=(label,val)=>{ doc.setFont('helvetica','normal'); tc(muted); doc.text(label,M,y); doc.setFont('helvetica','bold'); tc(ink); doc.text(String(val),M+36,y); y+=7; };
+    row('Design #', rug.code);
+    row('Collection', rug.collection+' Collection');
+    row('Customer', name);
+    row('Size needed', size||'—');
+
+    const cv=document.getElementById('rug');
+    const imgTop=y+5;
+    try{ const url=cv.toDataURL('image/jpeg',0.92); const iw=82, ih=iw*(cv.height/cv.width); doc.addImage(url,'JPEG',M,imgTop,iw,ih); }catch(e){}
+
+    const colX=108;
+    doc.setFont('helvetica','bold'); doc.setFontSize(11); tc(teal);
+    doc.text('Selected Colors', colX, imgTop+2);
+    doc.setFontSize(8); tc(muted); doc.setFont('helvetica','normal');
+    doc.text('Yarn   •   set to   •   coverage', colX, imgTop+7);
+    let cy=imgTop+14; doc.setFontSize(8.6);
+    yarns.forEach(c=>{
+      if(cy>276){ doc.addPage(); cy=22; }
+      const rgb=hex2rgb(hex(curRgb(c)));
+      doc.setFillColor(rgb[0],rgb[1],rgb[2]); doc.setDrawColor(188,188,188);
+      doc.rect(colX,cy-3.4,5,5,'FD');
+      tc(ink); doc.setFont('helvetica','bold'); doc.text('KAL-'+c.kal, colX+7.5, cy);
+      doc.setFont('helvetica','normal'); tc(muted);
+      doc.text(c.ars ? ('to '+c.ars.n) : (c.editedFlag ? 'custom color' : 'original'), colX+28, cy);
+      doc.text(c.pct.toFixed(1)+'%', PW-M, cy, {align:'right'});
+      cy+=7;
+    });
+
+    doc.setFont('helvetica','italic'); doc.setFontSize(8); tc(muted);
+    doc.text(doc.splitTextToSize('On-screen colors are approximate — always confirm against physical wool pom samples before ordering. Prototype; not connected to ordering.', PW-2*M), M, 289);
+
+    const fn=('Kalaty-'+rug.code+'-'+name).replace(/[^A-Za-z0-9_-]+/g,'_')+'.pdf';
+    doc.save(fn);
+    res.innerHTML='<div class="savedmsg">✓ PDF downloaded — '+fn+'</div>';
+  }catch(e){
+    res.innerHTML='<div class="saveerr">Could not generate the PDF: '+(e&&e.message||e)+'</div>';
+  }
 }
 
 /* ---------- boot ---------- */
