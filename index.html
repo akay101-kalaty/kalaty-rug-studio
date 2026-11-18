@@ -4,20 +4,23 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Kalaty Rug Studio</title>
+<link rel="stylesheet" href="https://use.typekit.net/riu5xuu.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap">
 <style>
   :root{
     --teal:#006188; --teal-dark:#004d6b; --gold:#B39E65; --gold-soft:#cdbb8e;
     --ink:#20303a; --muted:#5e727d; --line:#e4e8ea; --bg:#f3f1ec; --card:#ffffff;
-    --serif:"Ovo", Georgia, "Times New Roman", serif;
+    --serif:"brandon-grotesque","Montserrat",-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
     --sans:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;}
   body{background:var(--bg); color:var(--ink); font-family:var(--sans); -webkit-font-smoothing:antialiased;}
 
-  header.appbar{display:flex;align-items:center;gap:14px;padding:15px 26px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;}
+  header.appbar{display:flex;align-items:center;gap:14px;padding:16px 32px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;}
   .brand{display:flex;align-items:center;gap:12px;text-decoration:none;}
-  .brand .logo{height:42px;width:auto;display:block;}
+  .brand .logo{height:90px;width:auto;display:block;}
   .brand .sub{font-family:var(--serif);font-size:13px;color:var(--gold);letter-spacing:.18em;text-transform:uppercase;border-left:1px solid var(--line);padding-left:12px;}
   .appbar .spacer{flex:1;}
   .search{position:relative;}
@@ -74,20 +77,20 @@
 </head>
 <body>
 <header class="appbar">
-  <a class="brand" href="./"><img class="logo" src="logo.svg" alt="Kalaty" /><span class="sub">Rug Studio</span></a>
+  <a class="brand" href="./"><img class="logo" src="logo.jpg" alt="Kalaty" /><span class="sub">Rug Studio</span></a>
   <div class="spacer"></div>
   <div class="search"><input id="search" type="search" placeholder="Search a design #…" autocomplete="off" /></div>
 </header>
 
 <section class="hero" id="hero">
-  <div class="eyebrow">Custom Colour Studio</div>
-  <h1>Design your own colourway</h1>
-  <p>Pick a collection, choose a design, then recolour each yarn from our full 600-colour wool bank — in real time, with the hand-knotted texture preserved.</p>
+  <div class="eyebrow">Custom Color Studio</div>
+  <h1>Design your own colorway</h1>
+  <p>Pick a collection, choose a design, then recolor each yarn from our full 600-color wool bank — in real time, with the hand-knotted texture preserved.</p>
 </section>
 
 <main id="catalog"><div class="loading"><div class="spinner"></div>Loading designs…</div></main>
 
-<footer><b>Prototype.</b> On-screen colours are approximate — always confirm against physical wool pom samples before ordering. Not connected to ordering.</footer>
+<footer><b>Prototype.</b> On-screen colors are approximate — always confirm against physical wool pom samples before ordering. Not connected to ordering.</footer>
 
 <script src="rugs.js"></script>
 <script>
@@ -112,7 +115,7 @@
       + '<div class="frame"><img loading="lazy" src="' + r.thumb + '" alt="' + esc(r.code) + '"></div>'
       + '<div class="meta"><div class="code">' + r.code + '</div>'
       + (withColl ? '<div class="sub">' + r.collection + '</div>' : '')
-      + '<div class="go">Customise &rsaquo;</div></div></a>';
+      + '<div class="go">Customize &rsaquo;</div></div></a>';
   }
 
   // ---- collections view ----
