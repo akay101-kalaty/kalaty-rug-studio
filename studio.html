@@ -469,10 +469,13 @@ function mergeByDeltaE(list, thresh){
 }
 // derive a yarn palette from the photo when no ground-truth color list exists
 function photoPalette(labs){
-  const km=kmeans(labs,16,16);
+  // Over-cluster more and merge less so muted, low-chroma accents (e.g. a pale blue or ivory on a
+  // grey-blue ground) survive as their own yarn instead of being absorbed into the ground.
+  const K=26;
+  const km=kmeans(labs,K,18);
   let list=[];
-  for(let k=0;k<16;k++) list.push({lab:[km.cent[k*3],km.cent[k*3+1],km.cent[k*3+2]], pct:100*km.cnt[k]/km.N});
-  list=mergeByDeltaE(list,9).filter(c=>c.pct>=0.8).sort((a,b)=>b.pct-a.pct);
+  for(let k=0;k<K;k++) list.push({lab:[km.cent[k*3],km.cent[k*3+1],km.cent[k*3+2]], pct:100*km.cnt[k]/km.N});
+  list=mergeByDeltaE(list,6).filter(c=>c.pct>=0.5).sort((a,b)=>b.pct-a.pct).slice(0,16);
   return list.map(c=>{ const rgb=lab2rgb(c.lab[0],c.lab[1],c.lab[2]); return {hex:hex(rgb), rgb, lab:c.lab, isBg:false}; });
 }
 
@@ -947,6 +950,12 @@ function run(img){
   // margin is never listed or recoloured.
   if(whiteN/totalPix > 0.003){
     clusters.forEach(c=>{ if(!c.isBg && c.lab[0] > 91 && Math.hypot(c.lab[1],c.lab[2]) < 8) c.isBg = true; });
+  }
+
+  // safety: never exceed the shader's colour limit (keep the backdrop + the largest yarns)
+  if(clusters.length > MAXC){
+    const bg=clusters.filter(c=>c.isBg), fg=clusters.filter(c=>!c.isBg).slice(0, MAXC-bg.length);
+    clusters = bg.concat(fg).sort((a,b)=>b.pct-a.pct);
   }
 
   // renormalise coverage % to the rug only (exclude the backdrop)
