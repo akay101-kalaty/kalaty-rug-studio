@@ -903,7 +903,7 @@ function doSave(){
 /* ---------- boot ---------- */
 function boot(){
   wireUI();
-  document.getElementById('chooseBtn').addEventListener('click',()=>openModal('rugModal'));
+  document.getElementById('chooseBtn').addEventListener('click',()=>{ window.location.href='./'; });
   document.getElementById('saveBtn').addEventListener('click',openSave);
   document.getElementById('saveConfirm').addEventListener('click',doSave);
   document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.close)));
