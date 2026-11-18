@@ -47,11 +47,11 @@
   .appbar .rugtag{
     /* centre over the rug/stage area, not the whole window (the 360px panel is on the right) */
     position:absolute;left:calc((100% - 360px)/2);top:50%;transform:translate(-50%,-50%);
-    font-family:var(--serif);font-size:14px;color:var(--muted);
-    text-align:center;line-height:1.35;white-space:nowrap;
+    font-family:var(--serif);font-size:17px;color:var(--muted);
+    text-align:center;line-height:1.3;white-space:nowrap;
   }
   @media (max-width:880px){ .appbar .rugtag{ left:50%; } }
-  .appbar .rugtag b{color:var(--ink);font-size:15px;letter-spacing:.04em;}
+  .appbar .rugtag b{color:var(--ink);font-size:24px;letter-spacing:.03em;}
 
   main{
     display:grid;
@@ -239,7 +239,6 @@
     cursor:pointer;margin-right:18px;transition:all .12s;letter-spacing:.01em;
   }
   .choosebtn:hover{background:#e2eff5;border-color:var(--teal);}
-  .rugtag .rtlabel{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);}
 
   /* modals */
   .modal{position:fixed;inset:0;background:rgba(16,30,40,.55);z-index:50;display:flex;align-items:center;justify-content:center;padding:24px;}
@@ -286,7 +285,7 @@
     <span class="sub">Rug Studio</span>
   </div>
   <div class="rugtag">
-    <span class="rtlabel">Design #</span> <b id="rugCode">AA-892</b><br>
+    <b id="rugCode">AA-892</b><br>
     <span id="rugDesc">Adana Collection</span>
   </div>
   <div class="spacer"></div>
