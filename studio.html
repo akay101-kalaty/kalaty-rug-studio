@@ -68,7 +68,7 @@
   .stage{
     position:relative;
     display:flex;align-items:center;justify-content:center;
-    padding:26px;
+    padding:14px;
     background:#ffffff;   /* clean white, like the original product shot */
     overflow:hidden;
   }
@@ -76,15 +76,15 @@
     position:relative;
     max-width:100%;max-height:100%;
     background:#fff;
-    padding:10px;         /* slim white frame; the product photo already carries its own white margin */
+    padding:7px;          /* slim white frame; the product photo already carries its own white margin */
     border-radius:4px;
     box-shadow:0 16px 44px rgba(20,45,60,.13), 0 3px 12px rgba(20,45,60,.08);
   }
   canvas#rug{
     display:block;
-    /* scale up to fill the stage (thumbnails are only ~512px tall natively) while leaving room
-       for the header + hint; capped so it never gets absurdly large on huge screens */
-    height:min(calc(100vh - 205px), 680px);
+    /* fill the stage height so the rug is as large as fits without page scroll (chrome = header +
+       stage/frame padding + hint); capped so it never gets absurd on huge screens */
+    height:min(calc(100vh - 182px), 800px);
     width:auto;
     max-width:100%;
     border-radius:6px;
@@ -144,6 +144,9 @@
   .yarn .meta{flex:1;min-width:0;}
   .yarn .code{font-size:13px;font-weight:600;color:var(--ink);letter-spacing:.02em;}
   .yarn .desc{font-size:11.5px;color:var(--muted);}
+  .yarn .matsel{margin-top:3px;font-size:11.5px;color:var(--ink);font-family:var(--sans);border:1px solid var(--line);border-radius:7px;padding:2px 6px;background:#fff;cursor:pointer;max-width:96px;}
+  .yarn .matsel:hover{border-color:var(--gold-soft);}
+  .yarn .matsel:focus{outline:none;border-color:var(--teal);}
   .yarn .pct{
     font-family:var(--serif);font-size:15px;color:var(--teal);font-weight:600;
     flex:0 0 auto;min-width:46px;text-align:right;
@@ -627,10 +630,16 @@ function buildPanel(){
       <div class="chip" style="background:${hex(c.baseRgb)}"></div>
       <div class="meta">
         <div class="code">${codeFor(i)} <span class="edited" ${c.editedFlag?'':'hidden'} data-ed>changed</span></div>
-        <div class="desc">${c.type}</div>
+        <select class="matsel" aria-label="Material">
+          <option value="Wool"${c.material==='Wool'?' selected':''}>Wool</option>
+          <option value="Silkette"${c.material==='Silkette'?' selected':''}>Silkette</option>
+        </select>
       </div>
       <div class="pct">${c.pct.toFixed(1)}%</div>`;
     el.addEventListener('click',()=>selectYarn(i));
+    const sel=el.querySelector('.matsel');
+    sel.addEventListener('click',e=>e.stopPropagation());
+    sel.addEventListener('change',e=>{ e.stopPropagation(); clusters[i].material=e.target.value; });
     list.appendChild(el);
   });
 }
@@ -849,7 +858,7 @@ function doSave(){
     doc.setFont('helvetica','bold'); doc.setFontSize(11); tc(teal);
     doc.text('Selected Colors', colX, imgTop+2);
     doc.setFontSize(8); tc(muted); doc.setFont('helvetica','normal');
-    doc.text('Yarn   •   set to   •   coverage', colX, imgTop+7);
+    doc.text('Yarn   ·   material / color   ·   coverage', colX, imgTop+7);
     let cy=imgTop+14; doc.setFontSize(8.6);
     yarns.forEach(c=>{
       if(cy>276){ doc.addPage(); cy=22; }
@@ -858,7 +867,7 @@ function doSave(){
       doc.rect(colX,cy-3.4,5,5,'FD');
       tc(ink); doc.setFont('helvetica','bold'); doc.text('KAL-'+c.kal, colX+7.5, cy);
       doc.setFont('helvetica','normal'); tc(muted);
-      doc.text(c.ars ? ('to '+c.ars.n) : (c.editedFlag ? 'custom color' : 'original'), colX+28, cy);
+      doc.text((c.material||'Wool')+'  ·  '+(c.ars ? c.ars.n : (c.editedFlag ? 'custom' : 'original')), colX+26, cy);
       doc.text(c.pct.toFixed(1)+'%', PW-M, cy, {align:'right'});
       cy+=7;
     });
@@ -942,7 +951,7 @@ function run(img){
   clusters=centroids.map((c,i)=>{
     const mean = cnt[i]>0 ? [sum[i][0]/cnt[i], sum[i][1]/cnt[i], sum[i][2]/cnt[i]] : c.lab.slice();
     return { lab:mean, baseRgb:lab2rgb(mean[0],mean[1],mean[2]), target:mean.slice(),
-      pct:100*cnt[i]/totalPix, editedFlag:false, type:yarnType(mean), ars:null, isBg:!!c.isBg };
+      pct:100*cnt[i]/totalPix, editedFlag:false, type:yarnType(mean), ars:null, material:'Wool', isBg:!!c.isBg };
   }).sort((a,b)=>b.pct-a.pct);
 
   // Also flag any near-pure-white CLUSTER as backdrop (rug ivories stay below ~L90). This covers
