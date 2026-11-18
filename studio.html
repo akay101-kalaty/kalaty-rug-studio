@@ -478,7 +478,24 @@ function photoPalette(labs){
   const km=kmeans(labs,K,18);
   let list=[];
   for(let k=0;k<K;k++) list.push({lab:[km.cent[k*3],km.cent[k*3+1],km.cent[k*3+2]], pct:100*km.cnt[k]/km.N});
-  list=mergeByDeltaE(list,6).filter(c=>c.pct>=0.5).sort((a,b)=>b.pct-a.pct).slice(0,16);
+  list=mergeByDeltaE(list,6).filter(c=>c.pct>=0.5);
+  // Merge chromatic clusters of the SAME HUE FAMILY (one dyed colour at different depths — e.g. a
+  // rust that the photo split into light/dark shades). Keeps distinct hues (blue vs gold) and muted
+  // neutrals apart, but stops a single colour reading as several separate yarns.
+  const hueOf=l=>Math.atan2(l[2],l[1])*180/Math.PI;
+  const hueDist=(a,b)=>{let d=Math.abs(a-b)%360;return d>180?360-d:d;};
+  for(;;){
+    let bi=-1,bj=-1;
+    for(let i=0;i<list.length&&bi<0;i++)for(let j=i+1;j<list.length;j++){
+      const ci=Math.hypot(list[i].lab[1],list[i].lab[2]), cj=Math.hypot(list[j].lab[1],list[j].lab[2]);
+      if(ci>14&&cj>14&&hueDist(hueOf(list[i].lab),hueOf(list[j].lab))<16){bi=i;bj=j;break;}
+    }
+    if(bi<0)break;
+    const a=list[bi],b=list[bj],w=a.pct+b.pct||1;
+    a.lab=[(a.lab[0]*a.pct+b.lab[0]*b.pct)/w,(a.lab[1]*a.pct+b.lab[1]*b.pct)/w,(a.lab[2]*a.pct+b.lab[2]*b.pct)/w];
+    a.pct=w; list.splice(bj,1);
+  }
+  list=list.sort((a,b)=>b.pct-a.pct).slice(0,16);
   return list.map(c=>{ const rgb=lab2rgb(c.lab[0],c.lab[1],c.lab[2]); return {hex:hex(rgb), rgb, lab:c.lab, isBg:false}; });
 }
 
