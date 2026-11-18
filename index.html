@@ -6,910 +6,128 @@
 <title>Kalaty Rug Studio</title>
 <style>
   :root{
-    --teal:#006188;
-    --teal-dark:#004d6b;
-    --gold:#B39E65;
-    --gold-soft:#cdbb8e;
-    --ink:#20303a;
-    --muted:#5e727d;
-    --line:#e4e8ea;
-    --bg:#f3f1ec;
-    --card:#ffffff;
+    --teal:#006188; --teal-dark:#004d6b; --gold:#B39E65; --gold-soft:#cdbb8e;
+    --ink:#20303a; --muted:#5e727d; --line:#e4e8ea; --bg:#f3f1ec; --card:#ffffff;
     --serif:"Ovo", Georgia, "Times New Roman", serif;
     --sans:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
   *{box-sizing:border-box;}
-  html,body{margin:0;height:100%;}
-  body{
-    background:var(--bg);
-    color:var(--ink);
-    font-family:var(--sans);
-    -webkit-font-smoothing:antialiased;
-  }
+  html,body{margin:0;}
+  body{background:var(--bg); color:var(--ink); font-family:var(--sans); -webkit-font-smoothing:antialiased;}
+
   header.appbar{
-    display:flex;align-items:center;gap:14px;
-    padding:14px 22px;
-    background:var(--card);
-    border-bottom:1px solid var(--line);
-    position:sticky;top:0;z-index:5;
+    display:flex;align-items:center;gap:14px;padding:16px 26px;
+    background:var(--card);border-bottom:1px solid var(--line);
+    position:sticky;top:0;z-index:20;
   }
-  .brand{display:flex;align-items:baseline;gap:10px;}
-  .brand .mark{
-    font-family:var(--serif);
-    font-size:24px;letter-spacing:.14em;font-weight:600;
-    color:var(--teal);
-  }
-  .brand .sub{
-    font-family:var(--serif);
-    font-size:14px;color:var(--gold);letter-spacing:.18em;text-transform:uppercase;
-  }
+  .brand{display:flex;align-items:baseline;gap:10px;text-decoration:none;}
+  .brand .mark{font-family:var(--serif);font-size:24px;letter-spacing:.14em;font-weight:600;color:var(--teal);}
+  .brand .sub{font-family:var(--serif);font-size:14px;color:var(--gold);letter-spacing:.18em;text-transform:uppercase;}
   .appbar .spacer{flex:1;}
-  .appbar .rugtag{
-    /* centre over the rug/stage area, not the whole window (the 360px panel is on the right) */
-    position:absolute;left:calc((100% - 360px)/2);top:50%;transform:translate(-50%,-50%);
-    font-family:var(--serif);font-size:17px;color:var(--muted);
-    text-align:center;line-height:1.3;white-space:nowrap;
-  }
-  @media (max-width:880px){ .appbar .rugtag{ left:50%; } }
-  .appbar .rugtag b{color:var(--ink);font-size:24px;letter-spacing:.03em;}
+  .navjump{display:flex;gap:16px;flex-wrap:wrap;}
+  .navjump a{font-size:13px;color:var(--muted);text-decoration:none;letter-spacing:.03em;padding:4px 2px;border-bottom:2px solid transparent;transition:color .12s,border-color .12s;}
+  .navjump a:hover{color:var(--teal);border-color:var(--gold-soft);}
+  @media (max-width:760px){ .navjump{display:none;} }
 
-  main{
-    display:grid;
-    grid-template-columns:minmax(0,1fr) 360px;
-    gap:0;
-    height:calc(100vh - 61px);
+  .hero{
+    text-align:center;padding:54px 24px 30px;
+    background:radial-gradient(120% 120% at 50% 0%, #ffffff 0%, var(--bg) 75%);
   }
-  @media (max-width:880px){
-    main{grid-template-columns:1fr;height:auto;}
-    .panel{border-left:none !important;border-top:1px solid var(--line);}
-  }
+  .hero h1{font-family:var(--serif);font-weight:600;font-size:38px;line-height:1.1;margin:0 0 14px;color:var(--ink);letter-spacing:.01em;}
+  .hero p{max-width:640px;margin:0 auto;font-size:16px;line-height:1.6;color:var(--muted);}
+  .hero .eyebrow{font-family:var(--serif);font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;}
 
-  /* ---- stage ---- */
-  .stage{
-    position:relative;
+  main{max-width:1240px;margin:0 auto;padding:12px 24px 60px;}
+  .section{scroll-margin-top:84px;padding-top:30px;}
+  .section h2{
+    font-family:var(--serif);font-size:24px;font-weight:600;color:var(--teal);margin:0 0 4px;letter-spacing:.01em;
+    display:flex;align-items:baseline;gap:12px;
+  }
+  .section h2 .cnt{font-family:var(--sans);font-size:12.5px;color:var(--muted);letter-spacing:.02em;font-weight:400;}
+  .section .rule{height:1px;background:var(--line);margin:12px 0 20px;}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:22px;}
+  .card{
+    display:block;text-decoration:none;color:inherit;background:var(--card);
+    border:1px solid var(--line);border-radius:16px;padding:12px;transition:transform .14s,box-shadow .14s,border-color .14s;
+  }
+  .card:hover{transform:translateY(-4px);box-shadow:0 16px 36px rgba(20,45,60,.14);border-color:var(--gold-soft);}
+  .card .frame{
+    background:#fff;border-radius:10px;overflow:hidden;aspect-ratio:1/1.12;
     display:flex;align-items:center;justify-content:center;
-    padding:26px;
-    background:#ffffff;   /* clean white, like the original product shot */
-    overflow:hidden;
   }
-  .rugframe{
-    position:relative;
-    max-width:100%;max-height:100%;
-    background:#fff;
-    padding:10px;         /* slim white frame; the product photo already carries its own white margin */
-    border-radius:4px;
-    box-shadow:0 16px 44px rgba(20,45,60,.13), 0 3px 12px rgba(20,45,60,.08);
-  }
-  canvas#rug{
-    display:block;
-    /* scale up to fill the stage (thumbnails are only ~512px tall natively) while leaving room
-       for the header + hint; capped so it never gets absurdly large on huge screens */
-    height:min(calc(100vh - 140px), 680px);
-    width:auto;
-    max-width:100%;
-    border-radius:6px;
-  }
-  .stage .loading{
-    position:absolute;inset:0;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
-    background:var(--bg);
-    color:var(--muted);font-family:var(--serif);font-size:15px;letter-spacing:.03em;
-    z-index:3;
-  }
-  .spinner{
-    width:30px;height:30px;border-radius:50%;
-    border:3px solid var(--gold-soft);border-top-color:var(--teal);
-    animation:spin 0.9s linear infinite;
-  }
+  .card img{width:100%;height:100%;object-fit:contain;display:block;}
+  .card .meta{padding:11px 4px 3px;text-align:center;}
+  .card .code{font-family:var(--serif);font-size:17px;font-weight:600;color:var(--ink);letter-spacing:.03em;}
+  .card .go{font-size:11.5px;color:var(--teal);letter-spacing:.05em;margin-top:3px;opacity:0;transition:opacity .14s;}
+  .card:hover .go{opacity:1;}
+
+  .loading{text-align:center;padding:60px 20px;color:var(--muted);font-family:var(--serif);font-size:16px;}
+  .spinner{width:30px;height:30px;border-radius:50%;border:3px solid var(--gold-soft);border-top-color:var(--teal);animation:spin .9s linear infinite;margin:0 auto 14px;}
   @keyframes spin{to{transform:rotate(360deg);}}
-  .stage .hint{
-    position:absolute;left:0;right:0;bottom:12px;text-align:center;
-    font-size:12px;color:var(--muted);
-  }
 
-  /* ---- panel ---- */
-  .panel{
-    background:var(--card);
-    border-left:1px solid var(--line);
-    display:flex;flex-direction:column;
-    min-height:0;
-  }
-  .panel .phead{
-    padding:18px 20px 12px;
-    border-bottom:1px solid var(--line);
-  }
-  .panel .phead h2{
-    margin:0;font-family:var(--serif);font-size:19px;font-weight:600;color:var(--ink);
-    letter-spacing:.01em;
-  }
-  .panel .phead p{margin:4px 0 0;font-size:12.5px;color:var(--muted);line-height:1.4;}
-
-  .swatchlist{
-    overflow-y:auto;flex:1;min-height:120px;
-    padding:8px 10px 10px;
-  }
-  .yarn{
-    display:flex;align-items:center;gap:12px;
-    padding:9px 10px;border-radius:12px;cursor:pointer;
-    border:1px solid transparent;
-    transition:background .12s,border-color .12s;
-  }
-  .yarn:hover{background:#f6f8f9;}
-  .yarn.sel{background:#eef5f8;border-color:#bfe0ee;}
-  .yarn .chip{
-    width:40px;height:40px;border-radius:9px;flex:0 0 auto;
-    border:1px solid rgba(0,0,0,.14);
-    box-shadow:inset 0 0 0 2px rgba(255,255,255,.35);
-  }
-  .yarn .meta{flex:1;min-width:0;}
-  .yarn .code{font-size:13px;font-weight:600;color:var(--ink);letter-spacing:.02em;}
-  .yarn .desc{font-size:11.5px;color:var(--muted);}
-  .yarn .pct{
-    font-family:var(--serif);font-size:15px;color:var(--teal);font-weight:600;
-    flex:0 0 auto;min-width:46px;text-align:right;
-  }
-  .yarn .edited{
-    font-size:10px;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;
-  }
-
-  /* editor */
-  .editor{
-    border-top:1px solid var(--line);
-    padding:14px 18px 16px;
-    background:#fbfaf7;
-  }
-  .editor.hidden{display:none;}
-  .editor .etitle{
-    font-family:var(--serif);font-size:14px;color:var(--ink);margin-bottom:10px;
-    display:flex;align-items:center;gap:8px;
-  }
-  .editor .etitle .dot{width:16px;height:16px;border-radius:5px;border:1px solid rgba(0,0,0,.15);}
-  .presets{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;}
-  .presets button{
-    width:26px;height:26px;border-radius:7px;border:1px solid rgba(0,0,0,.12);
-    cursor:pointer;padding:0;transition:transform .1s;
-  }
-  .presets button:hover{transform:scale(1.12);}
-
-  /* ---- ARS-600 yarn bank ---- */
-  .arswrap{margin-bottom:12px;}
-  .arshdr{
-    display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;
-  }
-  .arshdr .lbl{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
-  .arshdr .cur{font-size:11.5px;color:var(--teal);font-weight:600;}
-  .arssearch{
-    width:100%;border:1px solid var(--line);border-radius:9px;padding:7px 10px;font-size:12.5px;
-    background:#fff;color:var(--ink);margin-bottom:8px;font-family:var(--sans);
-  }
-  .arssearch:focus{outline:none;border-color:var(--teal);}
-  .arsgrid{
-    display:grid;grid-template-columns:repeat(12,1fr);gap:4px;
-    max-height:168px;overflow-y:auto;padding:5px;border:1px solid var(--line);
-    border-radius:10px;background:#e7ebee; /* tinted so pale/ivory swatches read as swatches, not a white "background" colour */
-  }
-  .arsgrid button{
-    width:100%;aspect-ratio:1/1;border-radius:5px;border:1px solid rgba(0,0,0,.22);
-    cursor:pointer;padding:0;transition:transform .08s;position:relative;
-  }
-  .arsgrid button:hover{transform:scale(1.22);z-index:2;box-shadow:0 2px 6px rgba(0,0,0,.25);}
-  .arsgrid button.on{outline:2px solid var(--teal);outline-offset:1px;}
-  .arsempty{grid-column:1/-1;text-align:center;color:var(--muted);font-size:11.5px;padding:14px 0;}
-  @media (max-width:880px){ .arsgrid{grid-template-columns:repeat(10,1fr);} }
-  .editor .row{display:flex;align-items:center;gap:10px;}
-  .editor input[type=color]{
-    width:52px;height:38px;border:1px solid var(--line);border-radius:9px;
-    background:#fff;cursor:pointer;padding:3px;
-  }
-  .editor .revert{
-    font-size:12px;color:var(--muted);background:none;border:1px solid var(--line);
-    padding:8px 12px;border-radius:9px;cursor:pointer;
-  }
-  .editor .revert:hover{color:var(--ink);border-color:var(--gold-soft);}
-  .toggle{
-    display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12.5px;color:var(--muted);
-    cursor:pointer;user-select:none;
-  }
-  .toggle input{accent-color:var(--teal);width:15px;height:15px;}
-
-  /* actions */
-  .actions{
-    display:flex;gap:10px;padding:14px 18px;border-top:1px solid var(--line);
-  }
-  .actions button{
-    flex:1;padding:11px 10px;border-radius:11px;font-size:13.5px;font-weight:600;
-    cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink);
-    letter-spacing:.02em;transition:all .12s;
-  }
-  .actions .primary{background:var(--teal);border-color:var(--teal);color:#fff;}
-  .actions .primary:hover{background:var(--teal-dark);}
-  .actions button:hover{border-color:var(--gold-soft);}
-  .actions .ghost:hover{background:#f6f8f9;}
-
-  .note{
-    padding:10px 18px 16px;font-size:11px;color:var(--muted);line-height:1.5;
-    border-top:1px solid var(--line);background:#fbfaf7;
-  }
-  .note b{color:var(--gold);font-weight:600;}
-
-  /* rug chooser button + design tag */
-  .choosebtn{
-    font-family:var(--sans);font-size:13px;font-weight:600;color:var(--teal);
-    background:#eef5f8;border:1px solid #cfe4ee;border-radius:10px;padding:9px 14px;
-    cursor:pointer;margin-right:18px;transition:all .12s;letter-spacing:.01em;
-  }
-  .choosebtn:hover{background:#e2eff5;border-color:var(--teal);}
-
-  /* modals */
-  .modal{position:fixed;inset:0;background:rgba(16,30,40,.55);z-index:50;display:flex;align-items:center;justify-content:center;padding:24px;}
-  .modal.hidden{display:none;}
-  .modalcard{background:var(--card);border-radius:18px;max-width:760px;width:100%;max-height:86vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 80px rgba(16,30,40,.4);}
-  .modalcard .mhead{display:flex;align-items:center;justify-content:space-between;padding:17px 22px;border-bottom:1px solid var(--line);}
-  .modalcard .mhead h3{margin:0;font-family:var(--serif);font-size:20px;color:var(--ink);font-weight:600;}
-  .modalcard .mclose{background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;line-height:1;padding:2px 9px;border-radius:8px;}
-  .modalcard .mclose:hover{background:#f1f4f6;color:var(--ink);}
-  .modalbody{padding:18px 22px;overflow-y:auto;}
-
-  /* rug gallery */
-  .collectionhdr{font-family:var(--serif);font-size:15px;color:var(--teal);margin:0 0 12px;letter-spacing:.02em;border-bottom:1px solid var(--line);padding-bottom:6px;}
-  .collectionhdr.more{margin-top:22px;}
-  .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(116px,1fr));gap:14px;margin-bottom:4px;}
-  .gcard{cursor:pointer;border:2px solid transparent;border-radius:12px;padding:6px;transition:all .12s;background:#fbfaf7;}
-  .gcard:hover{border-color:var(--gold-soft);background:#fff;}
-  .gcard.cur{border-color:var(--teal);}
-  .gcard img{width:100%;aspect-ratio:409/512;object-fit:cover;border-radius:7px;display:block;box-shadow:0 2px 8px rgba(20,45,60,.14);}
-  .gcard .gc{font-size:12px;font-weight:600;color:var(--ink);text-align:center;margin-top:6px;}
-
-  /* save form */
-  .savefield{margin-bottom:14px;}
-  .savefield label{display:block;font-size:12px;font-weight:600;color:var(--ink);margin-bottom:5px;letter-spacing:.02em;}
-  .savefield input{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px;font-family:var(--sans);color:var(--ink);background:#fff;}
-  .savefield input:focus{outline:none;border-color:var(--teal);}
-  .savesummary{background:#fbfaf7;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:12.5px;color:var(--muted);line-height:1.5;}
-  .savesummary b{color:var(--ink);}
-  .savesummary .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;}
-  .savesummary .chips span{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:20px;padding:3px 9px;}
-  .savesummary .chips i{width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.18);display:inline-block;}
-  .mfoot{display:flex;gap:10px;justify-content:flex-end;padding:15px 22px;border-top:1px solid var(--line);}
-  .mfoot button{padding:10px 18px;border-radius:10px;font-size:13.5px;font-weight:600;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink);}
-  .mfoot .primary{background:var(--teal);border-color:var(--teal);color:#fff;}
-  .mfoot .primary:hover{background:var(--teal-dark);}
-  .savedmsg{color:#1f7a53;font-weight:600;font-size:12.5px;margin-top:4px;}
-  .saveerr{color:#b4433a;font-size:12.5px;margin-top:4px;}
+  footer{border-top:1px solid var(--line);background:var(--card);padding:20px 26px;font-size:11.5px;color:var(--muted);line-height:1.6;text-align:center;}
+  footer b{color:var(--gold);}
 </style>
 </head>
 <body>
 <header class="appbar">
-  <div class="brand">
-    <span class="mark">KALATY</span>
-    <span class="sub">Rug Studio</span>
-  </div>
-  <div class="rugtag">
-    <b id="rugCode">AA-892</b><br>
-    <span id="rugDesc">Adana Collection</span>
-  </div>
+  <a class="brand" href="./"><span class="mark">KALATY</span><span class="sub">Rug Studio</span></a>
   <div class="spacer"></div>
-  <button class="choosebtn" id="chooseBtn">⊞ Choose a rug</button>
+  <nav class="navjump" id="navjump"></nav>
 </header>
 
-<main>
-  <section class="stage">
-    <div class="rugframe">
-      <canvas id="rug" width="10" height="10"></canvas>
-    </div>
-    <div class="loading" id="loading">
-      <div class="spinner"></div>
-      <div id="loadmsg">Loading rug…</div>
-    </div>
-    <div class="hint">Click a yarn colour on the right, then recolour it — the weave texture is preserved.</div>
-  </section>
+<section class="hero">
+  <div class="eyebrow">Custom Colour Studio</div>
+  <h1>Design your own colourway</h1>
+  <p>Choose any Kalaty design below, then recolour each yarn from our full 600-colour wool bank — in real time, with the hand-knotted weave and texture preserved.</p>
+</section>
 
-  <aside class="panel">
-    <div class="phead">
-      <h2>Colour Customization</h2>
-      <p>The design's actual yarn colours, by coverage. Select one to recolour from the ARS-600 bank.</p>
-    </div>
-
-    <div class="swatchlist" id="swatchlist"></div>
-
-    <div class="editor hidden" id="editor">
-      <div class="etitle"><span class="dot" id="editDot"></span><span id="editName">Yarn</span></div>
-      <div class="arswrap">
-        <div class="arshdr">
-          <span class="lbl">ARS-600 Yarn Bank</span>
-          <span class="cur" id="arsCur"></span>
-        </div>
-        <input class="arssearch" id="arsSearch" placeholder="Search a colour — e.g. 213, navy, ARS-511…" />
-        <div class="arsgrid" id="arsGrid"></div>
-      </div>
-      <div class="row">
-        <input type="color" id="picker" value="#006188" title="Custom colour" />
-        <button class="revert" id="revertBtn">Revert this yarn</button>
-      </div>
-      <label class="toggle">
-        <input type="checkbox" id="isolate" /> Highlight this yarn on the rug
-      </label>
-    </div>
-
-    <div class="actions">
-      <button class="ghost" id="resetBtn">Reset all</button>
-      <button class="primary" id="saveBtn">Save Custom Rug</button>
-    </div>
-
-    <div class="note">
-      <b>Prototype.</b> Recolour options are Kalaty's real <b>ARS-600</b> yarn bank. On-screen colours are
-      approximate — always confirm against physical wool pom samples before ordering. Phase 1 proof-of-concept;
-      not connected to ordering.
-    </div>
-  </aside>
+<main id="catalog">
+  <div class="loading"><div class="spinner"></div>Loading designs…</div>
 </main>
 
-<!-- Rug picker -->
-<div class="modal hidden" id="rugModal">
-  <div class="modalcard">
-    <div class="mhead"><h3>Choose a rug to customise</h3><button class="mclose" data-close="rugModal" aria-label="Close">×</button></div>
-    <div class="modalbody" id="galleryWrap"></div>
-  </div>
-</div>
+<footer>
+  <b>Prototype.</b> On-screen colours are approximate — always confirm against physical wool pom samples before ordering. Not connected to ordering.
+</footer>
 
-<!-- Save custom rug -->
-<div class="modal hidden" id="saveModal">
-  <div class="modalcard" style="max-width:460px">
-    <div class="mhead"><h3>Save Custom Rug</h3><button class="mclose" data-close="saveModal" aria-label="Close">×</button></div>
-    <div class="modalbody">
-      <div class="savesummary" id="saveSummary"></div>
-      <div class="savefield"><label for="custName">Customer name</label><input id="custName" placeholder="e.g. Jane Smith" autocomplete="off" /></div>
-      <div class="savefield"><label for="rugSize">Size needed</label><input id="rugSize" placeholder="e.g. 9 x 12 ft" autocomplete="off" /></div>
-      <div id="saveResult"></div>
-    </div>
-    <div class="mfoot">
-      <button data-close="saveModal">Cancel</button>
-      <button class="primary" id="saveConfirm">Save</button>
-    </div>
-  </div>
-</div>
-
-<script src="ars-colors.js"></script>
 <script src="rugs.js"></script>
 <script>
-/* ============================================================
-   Kalaty Rug Studio — Phase 1 recolor prototype
-   - k-means (CIELAB) palette separation from one rug photo
-   - WebGL fragment-shader recolor that preserves weave texture
-   ============================================================ */
+(function(){
+  var rugs = window.RUGS || [];
+  var catalog = document.getElementById('catalog');
+  var navjump = document.getElementById('navjump');
+  if(!rugs.length){ catalog.innerHTML = '<div class="loading">Could not load the designs.</div>'; return; }
 
-/* ---------- color-space helpers (JS side, for clustering) ---------- */
-function srgb2lin(c){ c/=255; return c<=0.04045 ? c/12.92 : Math.pow((c+0.055)/1.055,2.4); }
-function rgb2lab(r,g,b){
-  const R=srgb2lin(r), G=srgb2lin(g), B=srgb2lin(b);
-  let X=(0.4124*R+0.3576*G+0.1805*B)/0.95047;
-  let Y=(0.2126*R+0.7152*G+0.0722*B)/1.0;
-  let Z=(0.0193*R+0.1192*G+0.9505*B)/1.08883;
-  const f=t=> t>0.008856 ? Math.cbrt(t) : (7.787*t+16/116);
-  const fx=f(X),fy=f(Y),fz=f(Z);
-  return [116*fy-16, 500*(fx-fy), 200*(fy-fz)];
-}
-function lab2rgb(L,a,b){
-  let fy=(L+16)/116, fx=fy+a/500, fz=fy-b/200;
-  const inv=t=>{ const t3=t*t*t; return t3>0.008856 ? t3 : (t-16/116)/7.787; };
-  let X=0.95047*inv(fx), Y=1.0*inv(fy), Z=1.08883*inv(fz);
-  let R= 3.2406*X-1.5372*Y-0.4986*Z;
-  let G=-0.9689*X+1.8758*Y+0.0415*Z;
-  let B= 0.0557*X-0.2040*Y+1.0570*Z;
-  const g=c=>{ c=c<=0.0031308 ? 12.92*c : 1.055*Math.pow(c,1/2.4)-0.055; return Math.max(0,Math.min(255,Math.round(c*255))); };
-  return [g(R),g(G),g(B)];
-}
-function hex(rgb){ return '#'+rgb.map(v=>v.toString(16).padStart(2,'0')).join(''); }
-function hex2rgb(h){ h=h.replace('#',''); return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]; }
-
-/* ---------- ARS-600 yarn bank (Kalaty's real color pool from ExploRug) ---------- */
-const ARS = (window.ARS_COLORS||[]).map(c=>{
-  const rgb=hex2rgb(c.h);
-  return { n:c.n, h:c.h.toUpperCase(), rgb, lab:rgb2lab(rgb[0],rgb[1],rgb[2]) };
-});
-// a coarse hue/tone label for free-text search of the bank
-function toneWords(lab){
-  const L=lab[0], ch=Math.hypot(lab[1],lab[2]);
-  const words=[];
-  if(L>82) words.push('ivory','cream','white');
-  else if(L>66) words.push('light');
-  else if(L<24) words.push('dark','black');
-  if(ch<10){ words.push('grey','gray','neutral'); }
-  else {
-    const hdeg=(Math.atan2(lab[2],lab[1])*180/Math.PI+360)%360;
-    if(hdeg<20||hdeg>=345) words.push('red','rose','garnet');
-    else if(hdeg<45) words.push('rust','terracotta','orange','brown');
-    else if(hdeg<70) words.push('gold','mustard','tan','camel');
-    else if(hdeg<160) words.push('green','sage','olive');
-    else if(hdeg<200) words.push('teal','aqua');
-    else if(hdeg<255) words.push('blue','navy','denim');
-    else if(hdeg<300) words.push('purple','violet');
-    else words.push('pink','magenta');
-  }
-  return words.join(' ');
-}
-
-/* ---------- photo-clustering fallback (for designs with no ExploRug palette) ---------- */
-function kmeans(points, K, iters){
-  const N=points.length/3;
-  const cent=new Float32Array(K*3);
-  let i0=Math.floor(Math.random()*N)*3;
-  cent.set([points[i0],points[i0+1],points[i0+2]],0);
-  const dist=new Float32Array(N).fill(Infinity);
-  for(let k=1;k<K;k++){
-    let sum=0;
-    for(let n=0;n<N;n++){ const p=n*3,c=(k-1)*3; const dx=points[p]-cent[c],dy=points[p+1]-cent[c+1],dz=points[p+2]-cent[c+2]; const d=dx*dx+dy*dy+dz*dz; if(d<dist[n])dist[n]=d; sum+=dist[n]; }
-    let r=Math.random()*sum,pick=0;
-    for(let n=0;n<N;n++){ r-=dist[n]; if(r<=0){pick=n;break;} pick=n; }
-    cent.set([points[pick*3],points[pick*3+1],points[pick*3+2]],k*3);
-  }
-  const assign=new Int32Array(N);
-  for(let it=0;it<iters;it++){
-    for(let n=0;n<N;n++){ const p=n*3; let best=0,bd=Infinity; for(let k=0;k<K;k++){ const c=k*3; const dx=points[p]-cent[c],dy=points[p+1]-cent[c+1],dz=points[p+2]-cent[c+2]; const d=dx*dx+dy*dy+dz*dz; if(d<bd){bd=d;best=k;} } assign[n]=best; }
-    const sum=new Float64Array(K*3), cnt=new Float64Array(K);
-    for(let n=0;n<N;n++){ const k=assign[n],p=n*3; sum[k*3]+=points[p];sum[k*3+1]+=points[p+1];sum[k*3+2]+=points[p+2];cnt[k]++; }
-    for(let k=0;k<K;k++){ if(cnt[k]>0){ cent[k*3]=sum[k*3]/cnt[k];cent[k*3+1]=sum[k*3+1]/cnt[k];cent[k*3+2]=sum[k*3+2]/cnt[k]; } }
-  }
-  const cnt=new Float64Array(K);
-  for(let n=0;n<N;n++){ const p=n*3; let best=0,bd=Infinity; for(let k=0;k<K;k++){ const c=k*3; const dx=points[p]-cent[c],dy=points[p+1]-cent[c+1],dz=points[p+2]-cent[c+2]; const d=dx*dx+dy*dy+dz*dz; if(d<bd){bd=d;best=k;} } cnt[best]++; }
-  return {cent,cnt,N};
-}
-function mergeByDeltaE(list, thresh){
-  const c=list.map(x=>({lab:x.lab.slice(),pct:x.pct}));
-  const dE=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
-  for(;;){
-    let bi=-1,bj=-1,bd=thresh;
-    for(let i=0;i<c.length;i++)for(let j=i+1;j<c.length;j++){ const d=dE(c[i].lab,c[j].lab); if(d<bd){bd=d;bi=i;bj=j;} }
-    if(bi<0)break;
-    const a=c[bi],b=c[bj],w=a.pct+b.pct||1;
-    a.lab=[(a.lab[0]*a.pct+b.lab[0]*b.pct)/w,(a.lab[1]*a.pct+b.lab[1]*b.pct)/w,(a.lab[2]*a.pct+b.lab[2]*b.pct)/w]; a.pct=w; c.splice(bj,1);
-  }
-  return c;
-}
-// derive a yarn palette from the photo when no ground-truth colour list exists
-function photoPalette(labs){
-  const km=kmeans(labs,16,16);
-  let list=[];
-  for(let k=0;k<16;k++) list.push({lab:[km.cent[k*3],km.cent[k*3+1],km.cent[k*3+2]], pct:100*km.cnt[k]/km.N});
-  list=mergeByDeltaE(list,9).filter(c=>c.pct>=0.8).sort((a,b)=>b.pct-a.pct);
-  return list.map(c=>{ const rgb=lab2rgb(c.lab[0],c.lab[1],c.lab[2]); return {hex:hex(rgb), rgb, lab:c.lab, isBg:false}; });
-}
-
-/* ---------- WebGL ---------- */
-const MAXC=20;
-const VS=`attribute vec2 p; varying vec2 uv;
-void main(){ uv=vec2((p.x+1.0)/2.0,(1.0-p.y)/2.0); gl_Position=vec4(p,0.0,1.0); }`;
-
-const FS=`precision highp float;
-varying vec2 uv;
-uniform sampler2D tex;
-uniform vec3 uBase[${MAXC}];
-uniform vec3 uTarget[${MAXC}];
-uniform int uCount;
-uniform int uSelected;
-uniform float uHighlight;
-uniform float uChroma;
-
-float s2l(float c){ return c<=0.04045 ? c/12.92 : pow((c+0.055)/1.055,2.4); }
-float l2s(float c){ return c<=0.0031308 ? 12.92*c : 1.055*pow(c,1.0/2.4)-0.055; }
-vec3 rgb2lab(vec3 rgb){
-  float R=s2l(rgb.r),G=s2l(rgb.g),B=s2l(rgb.b);
-  float X=(0.4124*R+0.3576*G+0.1805*B)/0.95047;
-  float Y=(0.2126*R+0.7152*G+0.0722*B);
-  float Z=(0.0193*R+0.1192*G+0.9505*B)/1.08883;
-  vec3 t=vec3(X,Y,Z);
-  vec3 f=vec3(
-    t.x>0.008856?pow(t.x,1.0/3.0):7.787*t.x+16.0/116.0,
-    t.y>0.008856?pow(t.y,1.0/3.0):7.787*t.y+16.0/116.0,
-    t.z>0.008856?pow(t.z,1.0/3.0):7.787*t.z+16.0/116.0);
-  return vec3(116.0*f.y-16.0, 500.0*(f.x-f.y), 200.0*(f.y-f.z));
-}
-vec3 lab2rgb(vec3 lab){
-  float fy=(lab.x+16.0)/116.0, fx=fy+lab.y/500.0, fz=fy-lab.z/200.0;
-  vec3 f=vec3(fx,fy,fz);
-  vec3 t;
-  t.x = f.x*f.x*f.x>0.008856 ? f.x*f.x*f.x : (f.x-16.0/116.0)/7.787;
-  t.y = f.y*f.y*f.y>0.008856 ? f.y*f.y*f.y : (f.y-16.0/116.0)/7.787;
-  t.z = f.z*f.z*f.z>0.008856 ? f.z*f.z*f.z : (f.z-16.0/116.0)/7.787;
-  float X=0.95047*t.x, Y=t.y, Z=1.08883*t.z;
-  float R= 3.2406*X-1.5372*Y-0.4986*Z;
-  float G=-0.9689*X+1.8758*Y+0.0415*Z;
-  float B= 0.0557*X-0.2040*Y+1.0570*Z;
-  return clamp(vec3(l2s(R),l2s(G),l2s(B)),0.0,1.0);
-}
-void main(){
-  vec3 src=texture2D(tex,uv).rgb;
-  vec3 lab=rgb2lab(src);
-  vec3 base=uBase[0], tgt=uTarget[0];
-  float bd=1e9; int best=0;
-  for(int i=0;i<${MAXC};i++){
-    if(i>=uCount) break;
-    vec3 d=lab-uBase[i];
-    float dist=dot(d,d);
-    if(dist<bd){ bd=dist; base=uBase[i]; tgt=uTarget[i]; best=i; }
-  }
-  vec3 outLab;
-  outLab.x = tgt.x + (lab.x - base.x);
-  outLab.y = tgt.y + (lab.y - base.y)*uChroma;
-  outLab.z = tgt.z + (lab.z - base.z)*uChroma;
-  vec3 rgb = lab2rgb(outLab);
-  if(uHighlight>0.5 && best!=uSelected){
-    float gy=dot(rgb,vec3(0.299,0.587,0.114));
-    rgb = mix(vec3(gy), rgb, 0.18)*0.72;
-  }
-  gl_FragColor=vec4(rgb,1.0);
-}`;
-
-let gl, prog, uni={}, clusters=[], CHROMA=1.0; // 1.0 → an untouched yarn renders identical to the original photo
-let selected=-1, highlight=false;
-
-function compile(type,src){
-  const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s);
-  if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
-  return s;
-}
-function initGL(canvas,img){
-  gl=canvas.getContext('webgl',{preserveDrawingBuffer:true});
-  if(!gl) throw new Error('WebGL unavailable');
-  prog=gl.createProgram();
-  gl.attachShader(prog,compile(gl.VERTEX_SHADER,VS));
-  gl.attachShader(prog,compile(gl.FRAGMENT_SHADER,FS));
-  gl.linkProgram(prog);
-  if(!gl.getProgramParameter(prog,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
-  gl.useProgram(prog);
-  const buf=gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
-  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1, 1,-1, -1,1, 1,1]),gl.STATIC_DRAW);
-  const loc=gl.getAttribLocation(prog,'p');
-  gl.enableVertexAttribArray(loc);
-  gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
-
-  const tex=gl.createTexture();
-  gl.bindTexture(gl.TEXTURE_2D,tex);
-  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
-  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img);
-
-  uni.tex=gl.getUniformLocation(prog,'tex');
-  uni.base=gl.getUniformLocation(prog,'uBase');
-  uni.target=gl.getUniformLocation(prog,'uTarget');
-  uni.count=gl.getUniformLocation(prog,'uCount');
-  uni.selected=gl.getUniformLocation(prog,'uSelected');
-  uni.highlight=gl.getUniformLocation(prog,'uHighlight');
-  uni.chroma=gl.getUniformLocation(prog,'uChroma');
-  gl.uniform1i(uni.tex,0);
-}
-function render(){
-  const K=clusters.length;
-  const base=new Float32Array(MAXC*3), tgt=new Float32Array(MAXC*3);
-  for(let i=0;i<K;i++){
-    base.set(clusters[i].lab,i*3);
-    tgt.set(clusters[i].target,i*3);
-  }
-  gl.uniform3fv(uni.base,base);
-  gl.uniform3fv(uni.target,tgt);
-  gl.uniform1i(uni.count,K);
-  gl.uniform1i(uni.selected,selected);
-  gl.uniform1f(uni.highlight,highlight?1:0);
-  gl.uniform1f(uni.chroma,CHROMA);
-  gl.viewport(0,0,gl.drawingBufferWidth,gl.drawingBufferHeight);
-  gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
-}
-
-/* ---------- UI ---------- */
-// Generic rug-yarn codes (KAL-1000, KAL-1001, …) — deliberately NOT ARS numbers, since the
-// rug's own yarns are not the ARS pool; the ARS bank is only the palette of recolour options.
-// Each on-rug yarn is assigned a contiguous c.kal number (the white backdrop is skipped).
-function codeFor(i){ const c=clusters[i]; return (c&&c.kal) ? ('KAL-'+c.kal) : ('KAL-'+String(1000+i)); }
-function yarnType(lab){
-  // playful wool/silk tag by lightness/chroma
-  const chroma=Math.hypot(lab[1],lab[2]);
-  if(lab[0]>78) return 'Hand-spun wool · ivory';
-  if(chroma>45) return 'Silkette accent';
-  if(lab[0]<30) return 'Hand-spun wool · ground';
-  return 'Hand-spun wool';
-}
-
-function buildPanel(){
-  const list=document.getElementById('swatchlist');
-  list.innerHTML='';
-  clusters.forEach((c,i)=>{
-    if(c.isBg || c.hidden) return;   // backdrop + sub-2% slivers aren't recolourable yarns
-    const el=document.createElement('div');
-    el.className='yarn'; el.dataset.i=i;
-    el.innerHTML=`
-      <div class="chip" style="background:${hex(c.baseRgb)}"></div>
-      <div class="meta">
-        <div class="code">${codeFor(i)} <span class="edited" ${c.editedFlag?'':'hidden'} data-ed>changed</span></div>
-        <div class="desc">${c.type}</div>
-      </div>
-      <div class="pct">${c.pct.toFixed(1)}%</div>`;
-    el.addEventListener('click',()=>selectYarn(i));
-    list.appendChild(el);
+  // group by collection, preserving first-seen order
+  var cols = [];
+  rugs.forEach(function(r, i){
+    var g = cols.find(function(c){ return c.name === r.collection; });
+    if(!g){ g = { name:r.collection, items:[] }; cols.push(g); }
+    g.items.push({ r:r, i:i });
   });
-}
-function markSel(){
-  document.querySelectorAll('.yarn').forEach(el=>{
-    el.classList.toggle('sel', +el.dataset.i===selected);
-  });
-}
-function selectYarn(i){
-  selected=i;
-  markSel();
-  const c=clusters[i];
-  const ed=document.getElementById('editor'); ed.classList.remove('hidden');
-  document.getElementById('editName').textContent=codeFor(i)+' · '+c.pct.toFixed(1)+'%';
-  document.getElementById('editDot').style.background=hex(curRgb(c));
-  document.getElementById('picker').value=hex(curRgb(c));
-  document.getElementById('isolate').checked=highlight;
-  renderArsGrid();
-  updateArsCur();
-  render();
-}
-function curRgb(c){ return lab2rgb(c.target[0],c.target[1],c.target[2]); }
 
-function updateYarnLabel(i){
-  const c=clusters[i];
-  const yarnEl=document.querySelector('.yarn[data-i="'+i+'"]');
-  if(!yarnEl) return;
-  const codeEl=yarnEl.querySelector('.code');
-  if(codeEl && codeEl.firstChild) codeEl.firstChild.textContent=codeFor(i)+' ';
-  const b=yarnEl.querySelector('[data-ed]'); if(b) b.hidden=!c.editedFlag;
-}
-function updateArsCur(){
-  const el=document.getElementById('arsCur');
-  if(!el) return;
-  if(selected<0){ el.textContent=''; return; }
-  const c=clusters[selected];
-  el.textContent = c.ars ? ('Set to '+c.ars.n) : (c.editedFlag ? 'Custom colour' : '');
-  document.querySelectorAll('#arsGrid button').forEach(btn=>{
-    btn.classList.toggle('on', c.ars && btn.dataset.n===c.ars.n);
-  });
-}
-
-// core setter: set a yarn's target colour. arsObj is the ARS yarn chosen from the bank, or null
-// for a custom/free colour. The yarn keeps its own KAL-#### code either way.
-function setColorLab(i, lab, arsObj){
-  const c=clusters[i];
-  c.target=lab.slice();
-  c.ars = arsObj || null;
-  c.editedFlag = Math.hypot(c.target[0]-c.lab[0],c.target[1]-c.lab[1],c.target[2]-c.lab[2])>2;
-  updateYarnLabel(i);
-  if(selected===i){
-    document.getElementById('editName').textContent=codeFor(i)+' · '+c.pct.toFixed(1)+'%';
-    document.getElementById('editDot').style.background=hex(curRgb(c));
-    updateArsCur();
-  }
-  render();
-}
-// free RGB pick (custom colour → snaps label to nearest ARS yarn)
-function setColor(i,rgb){ setColorLab(i, rgb2lab(rgb[0],rgb[1],rgb[2]), null); }
-
-// render the ARS-600 yarn bank grid, optionally filtered by the search box
-let arsFilter='';
-function renderArsGrid(){
-  const grid=document.getElementById('arsGrid');
-  if(!grid) return;
-  const q=arsFilter.trim().toLowerCase();
-  let list=ARS;
-  if(q){
-    list=ARS.filter(a=>{
-      if(!a._s) a._s=(a.n+' '+toneWords(a.lab)).toLowerCase();
-      return a._s.indexOf(q)>=0 || a.h.toLowerCase().indexOf(q)>=0;
+  var html = '';
+  var nav = '';
+  cols.forEach(function(col){
+    var id = 'c-' + col.name.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+    nav += '<a href="#' + id + '">' + col.name + '</a>';
+    html += '<section class="section" id="' + id + '">';
+    html += '<h2>' + col.name + ' <span class="cnt">' + col.items.length + ' designs</span></h2><div class="rule"></div>';
+    html += '<div class="grid">';
+    col.items.forEach(function(it){
+      var code = it.r.code;
+      html += '<a class="card" href="studio.html?rug=' + encodeURIComponent(code) + '">'
+            +   '<div class="frame"><img loading="lazy" src="' + it.r.thumb + '" alt="' + code + '"></div>'
+            +   '<div class="meta"><div class="code">' + code + '</div><div class="go">Customise &rsaquo;</div></div>'
+            + '</a>';
     });
-  }
-  if(!list.length){ grid.innerHTML='<div class="arsempty">No colour matches “'+q+'”.</div>'; return; }
-  const cur = (selected>=0 && clusters[selected].ars) ? clusters[selected].ars.n : '';
-  const frag=document.createDocumentFragment();
-  list.forEach(a=>{
-    const b=document.createElement('button');
-    b.style.background=a.h; b.title=a.n+'  '+a.h; b.dataset.n=a.n;
-    if(a.n===cur) b.classList.add('on');
-    b.addEventListener('click',()=>{
-      if(selected<0) return;
-      document.getElementById('picker').value=a.h;
-      setColorLab(selected, a.lab, a);
-    });
-    frag.appendChild(b);
+    html += '</div></section>';
   });
-  grid.innerHTML=''; grid.appendChild(frag);
-}
 
-function wireUI(){
-  const picker=document.getElementById('picker');
-  picker.addEventListener('input',()=>{ if(selected>=0) setColor(selected,hex2rgb(picker.value)); });
-
-  const search=document.getElementById('arsSearch');
-  if(search) search.addEventListener('input',()=>{ arsFilter=search.value; renderArsGrid(); });
-
-  document.getElementById('revertBtn').addEventListener('click',()=>{
-    if(selected<0) return;
-    const c=clusters[selected];
-    setColorLab(selected, c.lab, null);   // back to the yarn's own detected colour
-    picker.value=hex(c.baseRgb);
-  });
-  document.getElementById('isolate').addEventListener('change',e=>{ highlight=e.target.checked; render(); });
-
-  document.getElementById('resetBtn').addEventListener('click',()=>{
-    clusters.forEach(c=>{ c.target=c.lab.slice(); c.ars=null; c.editedFlag=false; });
-    highlight=false; selected=-1;
-    if(search){ search.value=''; arsFilter=''; }
-    document.getElementById('editor').classList.add('hidden');
-    buildPanel(); markSel(); render();
-  });
-}
-
-/* ---------- rug catalog + loading ---------- */
-let currentRug=0;
-function loadRug(idx){
-  const rug=(window.RUGS||[])[idx];
-  if(!rug) return;
-  currentRug=idx;
-  document.getElementById('rugCode').textContent=rug.code;
-  document.getElementById('rugDesc').textContent=rug.collection+' Collection';
-  // reset interaction state for the new rug
-  selected=-1; highlight=false; clusters=[];
-  const ed=document.getElementById('editor'); if(ed) ed.classList.add('hidden');
-  const sr=document.getElementById('arsSearch'); if(sr){ sr.value=''; arsFilter=''; }
-  const loading=document.getElementById('loading');
-  loading.style.display='flex';
-  const sp=document.querySelector('.spinner'); if(sp) sp.style.display='';
-  document.getElementById('loadmsg').textContent='Loading '+rug.code+'…';
-  // mark current in gallery
-  document.querySelectorAll('.gcard').forEach(el=>el.classList.toggle('cur', +el.dataset.idx===idx));
-  const img=new Image();
-  img.onload=()=>{ try{ run(img); }catch(e){ fail(e.message); } };
-  img.onerror=()=>fail('Could not load rug image.');
-  img.src=rug.thumb;
-}
-
-function buildGallery(){
-  const wrap=document.getElementById('galleryWrap');
-  if(!wrap||!window.RUGS) return;
-  const cols=[];
-  window.RUGS.forEach((r,i)=>{ let g=cols.find(c=>c.name===r.collection); if(!g){g={name:r.collection,items:[]};cols.push(g);} g.items.push({r,i}); });
-  let html='';
-  cols.forEach((col,ci)=>{
-    html+='<div class="collectionhdr'+(ci>0?' more':'')+'">'+col.name+' Collection · '+col.items.length+' designs</div><div class="gallery">';
-    col.items.forEach(({r,i})=>{
-      html+='<div class="gcard" data-idx="'+i+'"><img src="'+r.thumb+'" alt="'+r.code+'" loading="lazy"><div class="gc">'+r.code+'</div></div>';
-    });
-    html+='</div>';
-  });
-  wrap.innerHTML=html;
-  wrap.querySelectorAll('.gcard').forEach(el=>{
-    el.addEventListener('click',()=>{ closeModal('rugModal'); loadRug(+el.dataset.idx); });
-  });
-}
-
-/* ---------- modals ---------- */
-function openModal(id){ const m=document.getElementById(id); if(m) m.classList.remove('hidden'); }
-function closeModal(id){ const m=document.getElementById(id); if(m) m.classList.add('hidden'); }
-
-/* ---------- save custom rug ---------- */
-function openSave(){
-  const rug=window.RUGS[currentRug];
-  const yarns=clusters.filter(c=>!c.isBg && !c.hidden);
-  const changed=yarns.filter(c=>c.editedFlag);
-  let chips='';
-  (changed.length?changed:yarns).forEach(c=>{
-    chips+='<span><i style="background:'+hex(curRgb(c))+'"></i>KAL-'+c.kal+(c.ars?(' → '+c.ars.n):'')+'</span>';
-  });
-  document.getElementById('saveSummary').innerHTML =
-    '<b>Design #'+rug.code+'</b> · '+rug.collection+' Collection<br>'+
-    (changed.length? (changed.length+' yarn'+(changed.length>1?'s':'')+' recoloured:') : 'Original colourway (no changes yet).')+
-    '<div class="chips">'+chips+'</div>';
-  document.getElementById('saveResult').innerHTML='';
-  document.getElementById('custName').value='';
-  document.getElementById('rugSize').value='';
-  openModal('saveModal');
-  setTimeout(()=>{ const n=document.getElementById('custName'); if(n) n.focus(); },50);
-}
-function doSave(){
-  const name=document.getElementById('custName').value.trim();
-  const size=document.getElementById('rugSize').value.trim();
-  const res=document.getElementById('saveResult');
-  if(!name){ res.innerHTML='<div class="saveerr">Please enter a customer name.</div>'; return; }
-  const rug=window.RUGS[currentRug];
-  const rec={
-    savedAt:new Date().toISOString(), customer:name, size:size||null,
-    design:rug.code, collection:rug.collection,
-    yarns: clusters.filter(c=>!c.isBg && !c.hidden).map(c=>({code:'KAL-'+c.kal, colour:hex(curRgb(c)), ars:c.ars?c.ars.n:null, changed:!!c.editedFlag}))
-  };
-  try{ const k='kalaty-custom-rugs'; const all=JSON.parse(localStorage.getItem(k)||'[]'); all.push(rec); localStorage.setItem(k,JSON.stringify(all)); }catch(e){}
-  res.innerHTML='<div class="savedmsg">✓ Saved for '+name+(size?(' · '+size):'')+'.</div>'
-    +'<div class="note" style="border:none;background:none;padding:6px 0 0">Prototype: stored in this browser only. A production version would send this custom-rug request to Kalaty with the design #, size and chosen colours.</div>';
-}
-
-/* ---------- boot ---------- */
-function boot(){
-  wireUI();
-  document.getElementById('chooseBtn').addEventListener('click',()=>openModal('rugModal'));
-  document.getElementById('saveBtn').addEventListener('click',openSave);
-  document.getElementById('saveConfirm').addEventListener('click',doSave);
-  document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.close)));
-  document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) closeModal(m.id); }));
-  buildGallery();
-  loadRug(0);
-}
-function fail(msg){
-  document.getElementById('loadmsg').textContent=msg;
-  document.querySelector('.spinner').style.display='none';
-}
-function run(img){
-  // 1) downscale for clustering
-  document.getElementById('loadmsg').textContent='Separating yarn colours…';
-  const SW=Math.min(img.width, 440), SH=Math.round(SW*img.height/img.width);
-  const sc=document.createElement('canvas'); sc.width=SW; sc.height=SH;
-  const sctx=sc.getContext('2d',{willReadFrequently:true});
-  sctx.drawImage(img,0,0,SW,SH);
-  const data=sctx.getImageData(0,0,SW,SH).data;
-
-  // 2) Palette = the design's GROUND-TRUTH yarn colours (ExploRug colortiles) when available,
-  //    otherwise clustered from the photo. Each pixel is assigned to its nearest palette colour,
-  //    giving the right yarn count with true colours and accurate coverage. The white product-shot
-  //    backdrop is a near-pure-white sweep lighter than any yarn, flagged wherever it falls.
-  const rug=window.RUGS[currentRug];
-
-  // cache each pixel's Lab once, and count near-pure-white pixels (for backdrop detection)
-  const totalPix=SW*SH;
-  const labs=new Float32Array(totalPix*3);
-  let whiteN=0;
-  for(let n=0;n<totalPix;n++){
-    const p=n*4; const L=rgb2lab(data[p],data[p+1],data[p+2]);
-    labs[n*3]=L[0];labs[n*3+1]=L[1];labs[n*3+2]=L[2];
-    if(L[0]>92 && Math.hypot(L[1],L[2])<7) whiteN++;
-  }
-
-  const palette = (rug.colors && rug.colors.length)
-    ? rug.colors.map(h=>{ const rgb=hex2rgb(h); return {hex:h.toUpperCase(), rgb, lab:rgb2lab(rgb[0],rgb[1],rgb[2]), isBg:false}; })
-    : photoPalette(labs);
-
-  const lightestL=Math.max.apply(null, palette.map(p=>p.lab[0]));
-  const centroids=palette.slice();
-  if(whiteN/totalPix > 0.003 && lightestL < 91){
-    centroids.push({hex:'#FCFCFC', rgb:[252,252,252], lab:rgb2lab(252,252,252), isBg:true}); // backdrop
-  }
-
-  // assign every pixel to its nearest known yarn → coverage counts AND the actual mean colour of the
-  // pixels in that yarn. The base used for recolour must be the PHOTO's own colour (not the catalog
-  // hex), so the untouched rug renders identical to the original and a recolour is a zero-mean shift.
-  const cnt=new Array(centroids.length).fill(0);
-  const sum=centroids.map(()=>[0,0,0]);
-  for(let n=0;n<totalPix;n++){
-    const lx=labs[n*3],ly=labs[n*3+1],lz=labs[n*3+2];
-    let bi=0,bd=Infinity;
-    for(let k=0;k<centroids.length;k++){ const c=centroids[k].lab; const dx=lx-c[0],dy=ly-c[1],dz=lz-c[2]; const d=dx*dx+dy*dy+dz*dz; if(d<bd){bd=d;bi=k;} }
-    cnt[bi]++; sum[bi][0]+=lx; sum[bi][1]+=ly; sum[bi][2]+=lz;
-  }
-  clusters=centroids.map((c,i)=>{
-    const mean = cnt[i]>0 ? [sum[i][0]/cnt[i], sum[i][1]/cnt[i], sum[i][2]/cnt[i]] : c.lab.slice();
-    return { lab:mean, baseRgb:lab2rgb(mean[0],mean[1],mean[2]), target:mean.slice(),
-      pct:100*cnt[i]/totalPix, editedFlag:false, type:yarnType(mean), ars:null, isBg:!!c.isBg };
-  }).sort((a,b)=>b.pct-a.pct);
-
-  // renormalise coverage % to the rug only (exclude the backdrop)
-  const rugTotal=clusters.filter(c=>!c.isBg).reduce((s,c)=>s+c.pct,0)||1;
-  clusters.forEach(c=>{ if(!c.isBg) c.pct=c.pct/rugTotal*100; });
-  // hide tiny yarns (<2% of the rug): kept in the render so their pixels stay original, but not
-  // listed, not selectable, not recolourable
-  clusters.forEach(c=>{ if(!c.isBg && c.pct<2) c.hidden=true; });
-  // contiguous KAL codes for the visible yarns only
-  let kn=1000;
-  clusters.forEach(c=>{ if(!c.isBg && !c.hidden){ c.kal=kn++; } });
-
-  // 4) WebGL at full image res
-  const canvas=document.getElementById('rug');
-  canvas.width=img.width; canvas.height=img.height;
-  initGL(canvas,img);
-  render();
-
-  buildPanel();
-  document.getElementById('loading').style.display='none';
-}
-boot();
+  catalog.innerHTML = html;
+  navjump.innerHTML = nav;
+})();
 </script>
 </body>
 </html>
