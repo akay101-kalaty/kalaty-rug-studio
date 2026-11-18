@@ -112,7 +112,7 @@
   function esc(s){ return String(s).replace(/"/g,'&quot;'); }
   function rugCard(r, withColl){
     return '<a class="card" href="studio.html?rug=' + encodeURIComponent(r.code) + '">'
-      + '<div class="frame"><img loading="lazy" src="' + r.thumb + '" alt="' + esc(r.code) + '"></div>'
+      + '<div class="frame"><img loading="lazy" src="' + r.img + '" alt="' + esc(r.code) + '"></div>'
       + '<div class="meta"><div class="code">' + r.code + '</div>'
       + (withColl ? '<div class="sub">' + r.collection + '</div>' : '')
       + '<div class="go">Customize &rsaquo;</div></div></a>';
@@ -124,7 +124,7 @@
     var h = '<div class="colgrid">';
     cols.forEach(function(col, idx){
       h += '<div class="coltile" data-i="' + idx + '">'
-        +   '<div class="cover"><img loading="lazy" src="' + col.items[0].thumb + '" alt="' + esc(col.name) + '">'
+        +   '<div class="cover"><img loading="lazy" src="' + col.items[0].img + '" alt="' + esc(col.name) + '">'
         +     '<div class="shade"></div><div class="label"><div class="nm">' + col.name + '</div>'
         +     '<div class="ct">' + col.items.length + ' designs</div></div></div>'
         + '</div>';

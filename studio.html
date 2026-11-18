@@ -762,7 +762,7 @@ function loadRug(idx){
   const img=new Image();
   img.onload=()=>{ try{ run(img); }catch(e){ fail(e.message); } };
   img.onerror=()=>fail('Could not load rug image.');
-  img.src=rug.thumb;
+  img.src=rug.img;
 }
 
 function buildGallery(){
@@ -774,7 +774,7 @@ function buildGallery(){
   cols.forEach((col,ci)=>{
     html+='<div class="collectionhdr'+(ci>0?' more':'')+'">'+col.name+' Collection · '+col.items.length+' designs</div><div class="gallery">';
     col.items.forEach(({r,i})=>{
-      html+='<div class="gcard" data-idx="'+i+'"><img src="'+r.thumb+'" alt="'+r.code+'" loading="lazy"><div class="gc">'+r.code+'</div></div>';
+      html+='<div class="gcard" data-idx="'+i+'"><img src="'+r.img+'" alt="'+r.code+'" loading="lazy"><div class="gc">'+r.code+'</div></div>';
     });
     html+='</div>';
   });
