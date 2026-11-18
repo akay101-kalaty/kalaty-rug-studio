@@ -33,15 +33,12 @@
     border-bottom:1px solid var(--line);
     position:sticky;top:0;z-index:5;
   }
-  .brand{display:flex;align-items:baseline;gap:10px;}
-  .brand .mark{
-    font-family:var(--serif);
-    font-size:24px;letter-spacing:.14em;font-weight:600;
-    color:var(--teal);
-  }
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand .logo{height:40px;width:auto;display:block;}
   .brand .sub{
     font-family:var(--serif);
-    font-size:14px;color:var(--gold);letter-spacing:.18em;text-transform:uppercase;
+    font-size:13px;color:var(--gold);letter-spacing:.18em;text-transform:uppercase;
+    border-left:1px solid var(--line);padding-left:12px;
   }
   .appbar .spacer{flex:1;}
   .appbar .rugtag{
@@ -280,10 +277,10 @@
 </head>
 <body>
 <header class="appbar">
-  <div class="brand">
-    <span class="mark">KALATY</span>
+  <a class="brand" href="./" title="All designs">
+    <img class="logo" src="logo.svg" alt="Kalaty" />
     <span class="sub">Rug Studio</span>
-  </div>
+  </a>
   <div class="rugtag">
     <b id="rugCode">AA-892</b><br>
     <span id="rugDesc">Adana Collection</span>
