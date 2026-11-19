@@ -107,6 +107,7 @@
     g.items.push(r);
   });
   cols.sort(function(a,b){ return a.name.localeCompare(b.name); });
+  cols.forEach(function(c){ c.items.sort(function(a,b){ return a.code.localeCompare(b.code, undefined, {numeric:true, sensitivity:'base'}); }); });
 
   function esc(s){ return String(s).replace(/"/g,'&quot;'); }
   function rugCard(r, withColl){
