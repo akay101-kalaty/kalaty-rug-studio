@@ -106,6 +106,7 @@
     if(!g){ g = { name:r.collection, items:[] }; cols.push(g); }
     g.items.push(r);
   });
+  cols.sort(function(a,b){ return a.name.localeCompare(b.name); });
 
   function esc(s){ return String(s).replace(/"/g,'&quot;'); }
   function rugCard(r, withColl){
