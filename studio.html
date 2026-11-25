@@ -1146,9 +1146,15 @@ function run(img){
   // renormalise coverage % to the rug only (exclude the backdrop)
   const rugTotal=clusters.filter(c=>!c.isBg).reduce((s,c)=>s+c.pct,0)||1;
   clusters.forEach(c=>{ if(!c.isBg) c.pct=c.pct/rugTotal*100; });
-  // hide tiny yarns (<2% of the rug): kept in the render so their pixels stay original, but not
-  // listed, not selectable, not recolorable
-  clusters.forEach(c=>{ if(!c.isBg && c.pct<2) c.hidden=true; });
+  // hide tiny yarns: kept in the render so their pixels stay original, but not listed/selectable.
+  // For a design with a TRUE yarn palette (ExploRug colortiles) every color is a real woven yarn —
+  // including the small vivid MOTIF colors (gold, steel-blue, amber, …) that cover only a few % — so
+  // list every one that actually appears (≥0.3% of the rug); only a palette color essentially absent
+  // from this photo stays hidden. Photo-clustered rugs keep the 2% cutoff so stray shadow/fringe
+  // clusters are not surfaced as if they were yarns.
+  const hasTruePalette = !!(rug.colors && rug.colors.length);
+  const HIDE_PCT = hasTruePalette ? 0.3 : 2;
+  clusters.forEach(c=>{ if(!c.isBg && c.pct<HIDE_PCT) c.hidden=true; });
 
   // Order the listed yarns by POSITION, not coverage %:
   //   1. the ACTUAL background first — the color that DOMINATES the most local cells (highest `ground`
