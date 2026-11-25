@@ -1137,6 +1137,47 @@ function run(img){
     clusters.forEach(c=>{ if(!c.isBg && c.lab[0] > 91 && Math.hypot(c.lab[1],c.lab[2]) < 8) c.isBg = true; });
   }
 
+  // Merge the BACKGROUND gradient into 2–3 swatches, not 5. A hand-knotted ground is woven with
+  // several close tones (abrash), so clustering splits one charcoal field into many near-identical
+  // greys. We fold those together so recoloring "the background" is one click, not five. Safeguards so
+  // this generalizes to every design, not just AA-892:
+  //   • only PERVASIVE field tones merge (spread ≥ FIELD_SPREAD — a color woven across the whole rug);
+  //     a localized motif/border/accent is never pervasive, so distinct accent yarns are left intact.
+  //   • COMPLETE-LINKAGE: a group merges only if EVERY pair in it stays within MERGE_DE, so a continuous
+  //     light→dark gradient is NOT chained into one blob, and two genuinely different field colors
+  //     (e.g. a red field vs a blue field) never merge. Merged tone = pixel-weighted mean (an untouched
+  //     render stays identical regardless, since target == base).
+  const FIELD_SPREAD=0.85, MERGE_DE=15;
+  {
+    let groups = clusters.filter(c=>!c.isBg).map(c=>({members:[c], field:(c.spread>=FIELD_SPREAD)}));
+    const clusDE=(p,q)=>{ const a=p.lab,b=q.lab; return Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]); };
+    const groupMaxDE=(g,h)=>{ let m=0; for(const p of g.members) for(const q of h.members){ const d=clusDE(p,q); if(d>m)m=d; } return m; };
+    let merging=true;
+    while(merging){
+      merging=false; let bi=-1,bj=-1,bd=MERGE_DE;
+      for(let i=0;i<groups.length;i++) for(let j=i+1;j<groups.length;j++){
+        if(!groups[i].field || !groups[j].field) continue;
+        const d=groupMaxDE(groups[i],groups[j]);     // complete-linkage: merge only if all pairs ≤ MERGE_DE
+        if(d<=bd){ bd=d; bi=i; bj=j; }
+      }
+      if(bi>=0){ groups[bi].members=groups[bi].members.concat(groups[bj].members); groups.splice(bj,1); merging=true; }
+    }
+    const drop=new Set();
+    groups.forEach(g=>{
+      if(g.members.length<2) return;
+      const surv=g.members.reduce((a,b)=> a.pct>=b.pct?a:b);   // keep the largest member as the swatch
+      let w=0; const m=[0,0,0];
+      g.members.forEach(c=>{ const wt=c.pct||1e-4; w+=wt; m[0]+=c.lab[0]*wt; m[1]+=c.lab[1]*wt; m[2]+=c.lab[2]*wt; });
+      m[0]/=w; m[1]/=w; m[2]/=w;
+      surv.lab=m; surv.baseRgb=lab2rgb(m[0],m[1],m[2]); surv.target=m.slice();
+      surv.pct=g.members.reduce((s,c)=>s+c.pct,0);
+      surv.spread=Math.max(...g.members.map(c=>c.spread));
+      surv.ground=g.members.reduce((s,c)=>s+c.ground,0);
+      g.members.forEach(c=>{ if(c!==surv) drop.add(c); });
+    });
+    if(drop.size) clusters=clusters.filter(c=>!drop.has(c));
+  }
+
   // safety: never exceed the shader's colour limit (keep the backdrop + the largest yarns)
   if(clusters.length > MAXC){
     const bg=clusters.filter(c=>c.isBg), fg=clusters.filter(c=>!c.isBg).slice(0, MAXC-bg.length);
@@ -1150,19 +1191,29 @@ function run(img){
   // listed, not selectable, not recolorable
   clusters.forEach(c=>{ if(!c.isBg && c.pct<2) c.hidden=true; });
 
-  // Order the listed yarns by POSITION, not coverage %:
-  //   1. the ACTUAL background first — the color that DOMINATES the most local cells (highest `ground`
-  //      score; ties broken by larger area). Chosen this way, not by %, so a big scattered motif is never
-  //      mistaken for the ground, and a ground broken up by dense pattern is still found.
-  //   2. then every other yarn from the OUTSIDE IN — by `outerness` descending, so the outer border band
-  //      leads, then inner guard stripes, then the pattern/motif colors toward the center land last.
+  // Order the listed yarns by POSITION, not coverage %. Two tiers:
+  //   BACKGROUND (tier 0) — the colors that actually DOMINATE territory: each is the plurality color of
+  //      a real share of the rug's local cells (`ground` ≥ GROUND_MIN). That is the true ground, plus any
+  //      secondary field tone that also holds its own ground — on an allover rug the "background" is 2–3
+  //      tones, so the tier holds all of them, not one. A scattered motif or a thin border is a minority
+  //      in every cell it touches (ground ≈ 0), so it is NOT background even when it covers many pixels
+  //      or sits on the outer edge. This is the motif-vs-background distinction the eye makes.
+  //      Ordered among themselves by `ground` desc, so the single most-dominant ground leads.
+  //   EVERYTHING ELSE (tier 1) — borders and motifs. Ordered OUTSIDE-IN (`outerness` desc) so an outer
+  //      border band leads, inner guards next, center motifs last. Outside-in is confined to THIS tier,
+  //      so a scattered accent can never outrank a true background tone.
   //   Coverage % is only a final tiebreak, never the ordering key.
   const listed=clusters.filter(c=>!c.isBg && !c.hidden);
-  listed.forEach(c=>{ c.isField=false; });
-  const bg=listed.reduce((a,b)=> (b.ground>a.ground || (b.ground===a.ground && b.pct>a.pct))?b:a, listed[0]);
-  if(bg) bg.isField=true;
+  const GROUND_MIN=0.05;                            // "background" = dominates ≥5% of the rug's cells
+  listed.forEach(c=>{ c.isField = c.ground>=GROUND_MIN; });
+  if(!listed.some(c=>c.isField) && listed.length){ // degenerate rug (no dominator): ground = top dominator
+    const bg=listed.reduce((a,b)=> (b.ground>a.ground || (b.ground===a.ground && b.pct>a.pct))?b:a, listed[0]);
+    if(bg) bg.isField=true;
+  }
   const grp=c=> c.isBg?2 : c.isField?0 : 1;
-  clusters.sort((a,b)=> grp(a)-grp(b) || (b.outerness-a.outerness) || (b.pct-a.pct));
+  clusters.sort((a,b)=> grp(a)-grp(b)
+    || (grp(a)===0 ? (b.ground-a.ground) : (b.outerness-a.outerness))   // background by dominance, rest outside-in
+    || (b.pct-a.pct));
 
   // contiguous KAL codes for the visible yarns only, in the new display order
   let kn=1000;
