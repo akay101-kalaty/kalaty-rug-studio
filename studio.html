@@ -1066,16 +1066,44 @@ function run(img){
   // hex), so the untouched rug renders identical to the original and a recolor is a zero-mean shift.
   const cnt=new Array(centroids.length).fill(0);
   const sum=centroids.map(()=>[0,0,0]);
+  const pxIdx=new Uint8Array(totalPix);           // assigned centroid per pixel (for the border pass)
   for(let n=0;n<totalPix;n++){
     const lx=labs[n*3],ly=labs[n*3+1],lz=labs[n*3+2];
     let bi=0,bd=Infinity;
     for(let k=0;k<centroids.length;k++){ const c=centroids[k].lab; const dx=lx-c[0],dy=ly-c[1],dz=lz-c[2]; const d=dx*dx+dy*dy+dz*dz; if(d<bd){bd=d;bi=k;} }
-    cnt[bi]++; sum[bi][0]+=lx; sum[bi][1]+=ly; sum[bi][2]+=lz;
+    pxIdx[n]=bi; cnt[bi]++; sum[bi][0]+=lx; sum[bi][1]+=ly; sum[bi][2]+=lz;
   }
+  const means=centroids.map((c,i)=> cnt[i]>0 ? [sum[i][0]/cnt[i], sum[i][1]/cnt[i], sum[i][2]/cnt[i]] : c.lab.slice());
+
+  // --- border detection: how much of each yarn sits in the rug's outer frame vs its center ---
+  // A backdrop pixel (the white sweep) is anything assigned to the backdrop centroid or any near-white
+  // centroid. The rug = everything else; its bounding box frames the woven area. A yarn concentrated in
+  // the outer ring of that frame is a border/guard color; the field (ground) sits mostly in the center.
+  const hasBg = whiteN/totalPix > 0.003;
+  const bgCent=centroids.map((c,i)=> !!c.isBg || (hasBg && means[i][0]>91 && Math.hypot(means[i][1],means[i][2])<8));
+  let minX=SW,minY=SH,maxX=0,maxY=0,rugPix=0;
+  for(let n=0;n<totalPix;n++){
+    if(bgCent[pxIdx[n]]) continue;
+    const x=n%SW, y=(n/SW)|0;
+    if(x<minX)minX=x; if(x>maxX)maxX=x; if(y<minY)minY=y; if(y>maxY)maxY=y; rugPix++;
+  }
+  const BAND=0.18;                                 // outer 18% of each half-axis counts as the frame ring
+  const bcnt=new Array(centroids.length).fill(0);  // pixels of each yarn that fall in the ring
+  if(rugPix>0 && maxX>minX && maxY>minY){
+    const hx=(maxX-minX)/2, hy=(maxY-minY)/2, cx=(minX+maxX)/2, cy=(minY+maxY)/2;
+    for(let n=0;n<totalPix;n++){
+      const i=pxIdx[n]; if(bgCent[i]) continue;
+      const x=n%SW, y=(n/SW)|0;
+      const dx=1-Math.abs(x-cx)/hx, dy=1-Math.abs(y-cy)/hy; // 1 at edge → 0 at center
+      if(Math.min(dx,dy)<BAND) bcnt[i]++;
+    }
+  }
+
   clusters=centroids.map((c,i)=>{
-    const mean = cnt[i]>0 ? [sum[i][0]/cnt[i], sum[i][1]/cnt[i], sum[i][2]/cnt[i]] : c.lab.slice();
+    const mean = means[i];
     return { lab:mean, baseRgb:lab2rgb(mean[0],mean[1],mean[2]), target:mean.slice(),
-      pct:100*cnt[i]/totalPix, editedFlag:false, type:yarnType(mean), ars:null, material:'Wool', isBg:!!c.isBg };
+      pct:100*cnt[i]/totalPix, editedFlag:false, type:yarnType(mean), ars:null, material:'Wool', isBg:!!c.isBg,
+      borderFrac: cnt[i]>0 ? bcnt[i]/cnt[i] : 0 };
   }).sort((a,b)=>b.pct-a.pct);
 
   // Also flag any near-pure-white CLUSTER as backdrop (rug ivories stay below ~L90). This covers
@@ -1097,7 +1125,20 @@ function run(img){
   // hide tiny yarns (<2% of the rug): kept in the render so their pixels stay original, but not
   // listed, not selectable, not recolorable
   clusters.forEach(c=>{ if(!c.isBg && c.pct<2) c.hidden=true; });
-  // contiguous KAL codes for the visible yarns only
+
+  // order the listed yarns: background (the dominant field) first, then border/guard colors, then the
+  // rest — all by coverage within each group. Border yarns are those whose pixels sit mostly in the
+  // rug's outer frame ring; the field is the largest-coverage yarn that is NOT a border. (Rugs with no
+  // real border yield no border group, so the order falls back to plain coverage order — unchanged.)
+  const listed=clusters.filter(c=>!c.isBg && !c.hidden);
+  listed.forEach(c=>{ c.isBorder = c.borderFrac>=0.55; c.isField=false; });
+  const fieldCands=listed.filter(c=>!c.isBorder);
+  const field=(fieldCands.length?fieldCands:listed).reduce((a,b)=> b.pct>a.pct?b:a, (fieldCands.length?fieldCands:listed)[0]);
+  if(field){ field.isField=true; field.isBorder=false; }
+  const grp=c=> c.isBg?3 : c.isField?0 : c.isBorder?1 : 2;
+  clusters.sort((a,b)=> grp(a)-grp(b) || b.pct-a.pct);
+
+  // contiguous KAL codes for the visible yarns only, in the new display order
   let kn=1000;
   clusters.forEach(c=>{ if(!c.isBg && !c.hidden){ c.kal=kn++; } });
 
