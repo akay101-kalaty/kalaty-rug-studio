@@ -1075,10 +1075,15 @@ function run(img){
   }
   const means=centroids.map((c,i)=> cnt[i]>0 ? [sum[i][0]/cnt[i], sum[i][1]/cnt[i], sum[i][2]/cnt[i]] : c.lab.slice());
 
-  // --- border detection: how much of each yarn sits in the rug's outer frame vs its center ---
+  // --- spatial profile of each yarn: WHERE it sits, so the list can be ordered by position, not % ---
   // A backdrop pixel (the white sweep) is anything assigned to the backdrop centroid or any near-white
-  // centroid. The rug = everything else; its bounding box frames the woven area. A yarn concentrated in
-  // the outer ring of that frame is a border/guard color; the field (ground) sits mostly in the center.
+  // centroid. The rug = everything else; its bounding box frames the woven area. For each rug yarn we
+  // measure two position facts:
+  //   outerness = mean ring position of its pixels (0 at the rug's center → 1 at its outer edge). A
+  //               border/guard band is high; a center motif is low.
+  //   spread    = fraction of the rug's area-cells it appears in. The ACTUAL background is one pervasive
+  //               sheet touching nearly every cell (high spread); a MOTIF is localized (low spread) even
+  //               when it covers a lot of pixels. This is what separates the ground from the pattern.
   const hasBg = whiteN/totalPix > 0.003;
   const bgCent=centroids.map((c,i)=> !!c.isBg || (hasBg && means[i][0]>91 && Math.hypot(means[i][1],means[i][2])<8));
   let minX=SW,minY=SH,maxX=0,maxY=0,rugPix=0;
@@ -1087,23 +1092,42 @@ function run(img){
     const x=n%SW, y=(n/SW)|0;
     if(x<minX)minX=x; if(x>maxX)maxX=x; if(y<minY)minY=y; if(y>maxY)maxY=y; rugPix++;
   }
-  const BAND=0.18;                                 // outer 18% of each half-axis counts as the frame ring
-  const bcnt=new Array(centroids.length).fill(0);  // pixels of each yarn that fall in the ring
+  const nC=centroids.length;
+  const GRID=12;                                        // rug divided into GRID×GRID local cells
+  const nCells=GRID*GRID;
+  const eposSum=new Array(nC).fill(0);                  // Σ ring-position of each yarn's pixels
+  const cellCnt=new Int32Array(nCells*nC);             // pixels of yarn i in cell ci → [ci*nC+i]
+  const rugCell=new Uint8Array(nCells);                // which cells hold any rug pixel
   if(rugPix>0 && maxX>minX && maxY>minY){
-    const hx=(maxX-minX)/2, hy=(maxY-minY)/2, cx=(minX+maxX)/2, cy=(minY+maxY)/2;
+    const hx=(maxX-minX)/2||1, hy=(maxY-minY)/2||1, cx=(minX+maxX)/2, cy=(minY+maxY)/2;
+    const wX=(maxX-minX+1)/GRID, wY=(maxY-minY+1)/GRID;
     for(let n=0;n<totalPix;n++){
       const i=pxIdx[n]; if(bgCent[i]) continue;
       const x=n%SW, y=(n/SW)|0;
-      const dx=1-Math.abs(x-cx)/hx, dy=1-Math.abs(y-cy)/hy; // 1 at edge → 0 at center
-      if(Math.min(dx,dy)<BAND) bcnt[i]++;
+      eposSum[i]+=Math.max(Math.abs(x-cx)/hx, Math.abs(y-cy)/hy); // 0 at center → 1 at the rug's outer edge
+      const gx=Math.min(GRID-1,(x-minX)/wX|0), gy=Math.min(GRID-1,(y-minY)/wY|0), ci=gy*GRID+gx;
+      cellCnt[ci*nC+i]++; rugCell[ci]=1;
     }
   }
+  // Ground score = how many local cells each yarn DOMINATES (is the plurality/majority color of). The
+  // true background is one continuous sheet, so it is the most common color in most cells; a motif is a
+  // minority within any cell it decorates, even when scattered widely. This separates ground from pattern
+  // far more reliably than "appears in many cells" (a dense motif appears everywhere but dominates little).
+  const plurCells=new Array(nC).fill(0);
+  let rugCells=0, cellsOf=new Array(nC).fill(0);
+  for(let ci=0;ci<nCells;ci++){
+    if(!rugCell[ci]) continue; rugCells++;
+    let best=-1,bc=0; const base=ci*nC;
+    for(let i=0;i<nC;i++){ const v=cellCnt[base+i]; if(v>0) cellsOf[i]++; if(v>bc){bc=v;best=i;} }
+    if(best>=0) plurCells[best]++;
+  }
+  rugCells=rugCells||1;
 
   clusters=centroids.map((c,i)=>{
     const mean = means[i];
     return { lab:mean, baseRgb:lab2rgb(mean[0],mean[1],mean[2]), target:mean.slice(),
       pct:100*cnt[i]/totalPix, editedFlag:false, type:yarnType(mean), ars:null, material:'Wool', isBg:!!c.isBg,
-      borderFrac: cnt[i]>0 ? bcnt[i]/cnt[i] : 0 };
+      outerness: cnt[i]>0 ? eposSum[i]/cnt[i] : 0, spread: cellsOf[i]/rugCells, ground: plurCells[i]/rugCells };
   }).sort((a,b)=>b.pct-a.pct);
 
   // Also flag any near-pure-white CLUSTER as backdrop (rug ivories stay below ~L90). This covers
@@ -1126,17 +1150,19 @@ function run(img){
   // listed, not selectable, not recolorable
   clusters.forEach(c=>{ if(!c.isBg && c.pct<2) c.hidden=true; });
 
-  // order the listed yarns: background (the dominant field) first, then border/guard colors, then the
-  // rest — all by coverage within each group. Border yarns are those whose pixels sit mostly in the
-  // rug's outer frame ring; the field is the largest-coverage yarn that is NOT a border. (Rugs with no
-  // real border yield no border group, so the order falls back to plain coverage order — unchanged.)
+  // Order the listed yarns by POSITION, not coverage %:
+  //   1. the ACTUAL background first — the color that DOMINATES the most local cells (highest `ground`
+  //      score; ties broken by larger area). Chosen this way, not by %, so a big scattered motif is never
+  //      mistaken for the ground, and a ground broken up by dense pattern is still found.
+  //   2. then every other yarn from the OUTSIDE IN — by `outerness` descending, so the outer border band
+  //      leads, then inner guard stripes, then the pattern/motif colors toward the center land last.
+  //   Coverage % is only a final tiebreak, never the ordering key.
   const listed=clusters.filter(c=>!c.isBg && !c.hidden);
-  listed.forEach(c=>{ c.isBorder = c.borderFrac>=0.55; c.isField=false; });
-  const fieldCands=listed.filter(c=>!c.isBorder);
-  const field=(fieldCands.length?fieldCands:listed).reduce((a,b)=> b.pct>a.pct?b:a, (fieldCands.length?fieldCands:listed)[0]);
-  if(field){ field.isField=true; field.isBorder=false; }
-  const grp=c=> c.isBg?3 : c.isField?0 : c.isBorder?1 : 2;
-  clusters.sort((a,b)=> grp(a)-grp(b) || b.pct-a.pct);
+  listed.forEach(c=>{ c.isField=false; });
+  const bg=listed.reduce((a,b)=> (b.ground>a.ground || (b.ground===a.ground && b.pct>a.pct))?b:a, listed[0]);
+  if(bg) bg.isField=true;
+  const grp=c=> c.isBg?2 : c.isField?0 : 1;
+  clusters.sort((a,b)=> grp(a)-grp(b) || (b.outerness-a.outerness) || (b.pct-a.pct));
 
   // contiguous KAL codes for the visible yarns only, in the new display order
   let kn=1000;
