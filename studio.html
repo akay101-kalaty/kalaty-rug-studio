@@ -656,11 +656,16 @@ function initGL(canvas,img){
   gl.uniform1i(uni.tex,0);
 }
 function render(){
-  const K=clusters.length;
+  // Only the SELECTABLE yarns (listed, non-hidden) and the white backdrop are fed to the shader. A
+  // hidden sliver is NOT its own shader centroid, so its pixels fall to the nearest VISIBLE yarn and
+  // recolor together with it — nothing is left as an un-editable "leftover" color when every listed
+  // yarn is recolored.
+  const vis=clusters.filter(c=>c.isBg || !c.hidden);
+  const K=Math.min(vis.length, MAXC);
   const base=new Float32Array(MAXC*3), tgt=new Float32Array(MAXC*3);
   for(let i=0;i<K;i++){
-    base.set(clusters[i].lab,i*3);
-    tgt.set(clusters[i].target,i*3);
+    base.set(vis[i].lab,i*3);
+    tgt.set(vis[i].target,i*3);
   }
   gl.uniform3fv(uni.base,base);
   gl.uniform3fv(uni.target,tgt);
@@ -695,6 +700,8 @@ function swatchHex(c){
   if(c.editedFlag) return hex(curRgb(c));
   return c.catHex || hex(c.baseRgb);
 }
+// badge text for a recolored yarn: the picked ARS code, or "Custom color" for a free pick
+function editedText(c){ return c.ars ? ('Picked '+c.ars.n) : 'Custom color'; }
 // A short plain-language color name under each code, so you can tell at a glance which pom is the
 // rose, the steel blue, the sage, etc. Derived from the true yarn color.
 function colorName(c){
@@ -727,7 +734,7 @@ function buildPanel(){
       <div class="chip" style="background:${swatchHex(c)}"><span class="chippct">${c.pct.toFixed(1)}%</span></div>
       <div class="meta">
         <div class="code">${codeFor(i)} <span class="cname">${colorName(c)}</span></div>
-        <span class="edited" ${c.editedFlag?'':'hidden'} data-ed>changed</span>
+        <span class="edited" ${c.editedFlag?'':'hidden'} data-ed>${c.editedFlag?editedText(c):'changed'}</span>
         <select class="matsel" aria-label="Material">
           <option value="Wool"${c.material==='Wool'?' selected':''}>Wool</option>
           <option value="Silkette"${c.material==='Silkette'?' selected':''}>Silkette</option>
@@ -772,7 +779,7 @@ function updateYarnLabel(i){
   if(!yarnEl) return;
   const codeEl=yarnEl.querySelector('.code');
   if(codeEl && codeEl.firstChild) codeEl.firstChild.textContent=codeFor(i)+' ';
-  const b=yarnEl.querySelector('[data-ed]'); if(b) b.hidden=!c.editedFlag;
+  const b=yarnEl.querySelector('[data-ed]'); if(b){ b.hidden=!c.editedFlag; if(c.editedFlag) b.textContent=editedText(c); }
   const chip=yarnEl.querySelector('.chip'); if(chip) chip.style.background=swatchHex(c);  // reflect recolor on the pom
 }
 function updateArsCur(){
