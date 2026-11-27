@@ -710,8 +710,8 @@ function colorName(c){
   if(h>=175 && h<200) return 'Teal';
   if(h>=95  && h<175) return L<55?'Forest green':'Sage';
   if(h>=78  && h<95 ) return ch>22?'Gold':'Taupe';
-  if(h>=48  && h<78 ) return (ch>30 && L<60)?'Rust':(ch>22?'Gold':'Taupe');
-  return (ch>20) ? (L<50?'Terracotta':'Rose') : 'Mauve';   // reddish
+  if(h>=48  && h<78 ) return (ch>26 && L<62)?'Rust':(ch>22?'Gold':'Taupe');
+  return (ch>20) ? (L<62?'Rust':'Rose') : 'Mauve';   // reddish-brown reads as rust; only a light, soft red is rose
 }
 
 function buildPanel(){
@@ -1184,7 +1184,7 @@ function run(img){
   clusters=centroids.map((c,i)=>{
     const mean = means[i];
     return { lab:mean, baseRgb:lab2rgb(mean[0],mean[1],mean[2]), target:mean.slice(),
-      catHex: (typeof c.hex==='string' ? c.hex.toUpperCase() : null),  // the TRUE yarn color (colortiles), for the swatch pom
+      catHex: (typeof c.hex==='string' ? c.hex.toUpperCase() : null),  // the TRUE catalog yarn color, for the pom
       pct:100*cnt[i]/totalPix, editedFlag:false, type:yarnType(mean), ars:null, material:'Wool', isBg:!!c.isBg,
       outerness: cnt[i]>0 ? eposSum[i]/cnt[i] : 0, spread: cellsOf[i]/rugCells, ground: plurCells[i]/rugCells };
   }).sort((a,b)=>b.pct-a.pct);
