@@ -161,6 +161,7 @@
   }
   .yarn .meta{flex:1;min-width:0;}
   .yarn .code{font-size:14px;font-weight:600;color:var(--ink);letter-spacing:.02em;}
+  .yarn .cname{font-weight:500;color:var(--muted);font-size:11.5px;letter-spacing:.01em;}
   .yarn .desc{font-size:11.5px;color:var(--muted);}
   .yarn .matsel{margin-top:6px;font-size:12px;color:var(--ink);font-family:var(--sans);border:1px solid var(--line);border-radius:8px;padding:4px 8px;background:#fff;cursor:pointer;max-width:110px;}
   .yarn .matsel:hover{border-color:var(--gold-soft);}
@@ -687,6 +688,31 @@ function yarnType(lab){
   if(lab[0]<30) return 'Hand-spun wool · ground';
   return 'Hand-spun wool';
 }
+// The color to SHOW on the swatch pom: the yarn's true color (catalog colortile when we have it),
+// not the washed-out average of the photo pixels — so a muted accent (rose, steel blue, sage) reads
+// as itself instead of collapsing toward beige/grey. When the yarn has been recolored, show that.
+function swatchHex(c){
+  if(c.editedFlag) return hex(curRgb(c));
+  return c.catHex || hex(c.baseRgb);
+}
+// A short plain-language color name under each code, so you can tell at a glance which pom is the
+// rose, the steel blue, the sage, etc. Derived from the true yarn color.
+function colorName(c){
+  const lab = c.catHex ? rgb2lab(...hex2rgb(c.catHex)) : c.lab;
+  const L=lab[0], a=lab[1], b=lab[2], ch=Math.hypot(a,b);
+  let h=Math.atan2(b,a)*180/Math.PI; if(h<0)h+=360;
+  if(ch<6){                                   // near-neutral
+    if(a<-2 && b<6) return 'Sage';            // faint green-grey
+    return L<42?'Charcoal':L<60?'Slate grey':L<76?'Grey':'Ivory';
+  }
+  if(L>74 && ch<18) return 'Cream';
+  if(h>=200 && h<300) return 'Steel blue';
+  if(h>=175 && h<200) return 'Teal';
+  if(h>=95  && h<175) return L<55?'Forest green':'Sage';
+  if(h>=78  && h<95 ) return ch>22?'Gold':'Taupe';
+  if(h>=48  && h<78 ) return (ch>30 && L<60)?'Rust':(ch>22?'Gold':'Taupe');
+  return (ch>20) ? (L<50?'Terracotta':'Rose') : 'Mauve';   // reddish
+}
 
 function buildPanel(){
   const list=document.getElementById('swatchlist');
@@ -696,9 +722,9 @@ function buildPanel(){
     const el=document.createElement('div');
     el.className='yarn'; el.dataset.i=i;
     el.innerHTML=`
-      <div class="chip" style="background:${hex(c.baseRgb)}"><span class="chippct">${c.pct.toFixed(1)}%</span></div>
+      <div class="chip" style="background:${swatchHex(c)}"><span class="chippct">${c.pct.toFixed(1)}%</span></div>
       <div class="meta">
-        <div class="code">${codeFor(i)}</div>
+        <div class="code">${codeFor(i)} <span class="cname">${colorName(c)}</span></div>
         <span class="edited" ${c.editedFlag?'':'hidden'} data-ed>changed</span>
         <select class="matsel" aria-label="Material">
           <option value="Wool"${c.material==='Wool'?' selected':''}>Wool</option>
@@ -745,6 +771,7 @@ function updateYarnLabel(i){
   const codeEl=yarnEl.querySelector('.code');
   if(codeEl && codeEl.firstChild) codeEl.firstChild.textContent=codeFor(i)+' ';
   const b=yarnEl.querySelector('[data-ed]'); if(b) b.hidden=!c.editedFlag;
+  const chip=yarnEl.querySelector('.chip'); if(chip) chip.style.background=swatchHex(c);  // reflect recolor on the pom
 }
 function updateArsCur(){
   const el=document.getElementById('arsCur');
@@ -1157,6 +1184,7 @@ function run(img){
   clusters=centroids.map((c,i)=>{
     const mean = means[i];
     return { lab:mean, baseRgb:lab2rgb(mean[0],mean[1],mean[2]), target:mean.slice(),
+      catHex: (typeof c.hex==='string' ? c.hex.toUpperCase() : null),  // the TRUE yarn color (colortiles), for the swatch pom
       pct:100*cnt[i]/totalPix, editedFlag:false, type:yarnType(mean), ars:null, material:'Wool', isBg:!!c.isBg,
       outerness: cnt[i]>0 ? eposSum[i]/cnt[i] : 0, spread: cellsOf[i]/rugCells, ground: plurCells[i]/rugCells };
   }).sort((a,b)=>b.pct-a.pct);
