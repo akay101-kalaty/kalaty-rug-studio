@@ -706,11 +706,13 @@ function colorName(c){
     return L<42?'Charcoal':L<60?'Slate grey':L<76?'Grey':'Ivory';
   }
   if(L>74 && ch<18) return 'Cream';
+  // a muted warm neutral that leans pink (low yellow) reads as blush; a yellower one is plain taupe
+  const warm = (ch>22) ? 'Gold' : ((b<14 && a>=2) ? 'Blush' : 'Taupe');
   if(h>=200 && h<300) return 'Steel blue';
   if(h>=175 && h<200) return 'Teal';
   if(h>=95  && h<175) return L<55?'Forest green':'Sage';
-  if(h>=78  && h<95 ) return ch>22?'Gold':'Taupe';
-  if(h>=48  && h<78 ) return (ch>26 && L<62)?'Rust':(ch>22?'Gold':'Taupe');
+  if(h>=78  && h<95 ) return warm;
+  if(h>=48  && h<78 ) return (ch>26 && L<62)?'Rust':warm;
   return (ch>20) ? (L<62?'Rust':'Rose') : 'Mauve';   // reddish-brown reads as rust; only a light, soft red is rose
 }
 
