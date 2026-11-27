@@ -112,7 +112,7 @@
     background:var(--card);
     border-left:1px solid var(--line);
     display:flex;flex-direction:column;
-    min-height:0;
+    min-height:0;position:relative;
   }
   .panel .phead{
     padding:18px 20px 12px;
@@ -170,13 +170,21 @@
     display:block;margin-top:2px;font-size:10px;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;
   }
 
-  /* editor */
+  /* editor — floats out to the LEFT of the panel, over the rug stage (like the reference tool) */
   .editor{
-    border-top:1px solid var(--line);
-    padding:14px 18px 16px;
-    background:#fbfaf7;
+    position:absolute;right:calc(100% + 14px);top:14px;
+    width:368px;max-width:calc(100vw - 480px);
+    max-height:calc(100% - 28px);overflow-y:auto;
+    padding:16px 18px 18px;
+    background:var(--card);border:1px solid var(--line);border-radius:16px;
+    box-shadow:0 26px 70px rgba(16,30,40,.32);
+    z-index:30;
   }
   .editor.hidden{display:none;}
+  @media (max-width:880px){
+    .editor{position:static;width:auto;max-width:none;max-height:none;
+      border:none;border-top:1px solid var(--line);border-radius:0;box-shadow:none;background:#fbfaf7;}
+  }
   .editor .etitle{
     font-family:var(--serif);font-size:14px;color:var(--ink);margin-bottom:10px;
     display:flex;align-items:center;gap:8px;
@@ -206,7 +214,7 @@
   .arssearch:focus{outline:none;border-color:var(--teal);}
   .arsgrid{
     display:grid;grid-template-columns:repeat(10,1fr);gap:5px;
-    max-height:340px;overflow-y:auto;padding:7px;border:1px solid var(--line);
+    max-height:430px;overflow-y:auto;padding:7px;border:1px solid var(--line);
     border-radius:10px;background:#e7ebee; /* tinted so pale/ivory swatches read as swatches, not a white "background" color */
   }
   .arsgrid button{
@@ -534,6 +542,8 @@ uniform vec3 uTarget[${MAXC}];
 uniform int uCount;
 uniform int uSelected;
 uniform float uHighlight;
+uniform vec3 uSelBase;   // Lab of the selected yarn, for color-similarity highlighting
+uniform float uHlRad;    // Lab radius counted as "this color"
 uniform float uChroma;
 
 float s2l(float c){ return c<=0.04045 ? c/12.92 : pow((c+0.055)/1.055,2.4); }
@@ -580,15 +590,18 @@ void main(){
   outLab.z = tgt.z + (lab.z - base.z)*uChroma;
   vec3 rgb = lab2rgb(outLab);
   if(uHighlight>0.5){
-    if(best==uSelected){
-      // the selected yarn: brighten and lift chroma so it pops even when it is a muted neutral grey
-      // (grey-on-grey was invisible). Keeps its own hue, just louder.
+    // Highlight the selected yarn AND its near-twins: light a pixel when the YARN it was assigned to
+    // (its nearest centroid) is within uHlRad of the selected yarn. A background woven from
+    // several near-identical abrash tones then lights as one solid mass instead of a pixel-by-pixel
+    // speckle, while a distinct color (even a low-chroma one like the steel blue, whose nearest
+    // neighbour is far enough away) still lights only itself. Comparing assigned yarns, not raw pixels,
+    // keeps clean cluster boundaries so the blue does not bleed into the greys.
+    if(distance(base, uSelBase) < uHlRad){
       float gy=dot(rgb,vec3(0.299,0.587,0.114));
-      rgb = clamp(mix(vec3(gy), rgb, 1.35)*1.18 + 0.10, 0.0, 1.0);
+      rgb = clamp(mix(vec3(gy), rgb, 1.2)*1.08 + 0.05, 0.0, 1.0);    // selected color: gently brighten + lift chroma
     } else {
-      // everything else: flat near-black grey so only the selected yarn reads
       float gy=dot(rgb,vec3(0.299,0.587,0.114));
-      rgb = vec3(gy*0.22 + 0.03);
+      rgb = vec3(gy*0.22 + 0.03);                                     // everything else: flat near-black
     }
   }
   gl_FragColor=vec4(rgb,1.0);
@@ -636,6 +649,8 @@ function initGL(canvas,img){
   uni.count=gl.getUniformLocation(prog,'uCount');
   uni.selected=gl.getUniformLocation(prog,'uSelected');
   uni.highlight=gl.getUniformLocation(prog,'uHighlight');
+  uni.selBase=gl.getUniformLocation(prog,'uSelBase');
+  uni.hlRad=gl.getUniformLocation(prog,'uHlRad');
   uni.chroma=gl.getUniformLocation(prog,'uChroma');
   gl.uniform1i(uni.tex,0);
 }
@@ -651,6 +666,9 @@ function render(){
   gl.uniform1i(uni.count,K);
   gl.uniform1i(uni.selected,selected);
   gl.uniform1f(uni.highlight,highlight?1:0);
+  const sb=(selected>=0 && clusters[selected]) ? clusters[selected].lab : [0,0,0];
+  gl.uniform3fv(uni.selBase,new Float32Array(sb));
+  gl.uniform1f(uni.hlRad,11.0);   // group only near-twin yarns (abrash), not distinct colors
   gl.uniform1f(uni.chroma,CHROMA);
   gl.viewport(0,0,gl.drawingBufferWidth,gl.drawingBufferHeight);
   gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
