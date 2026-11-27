@@ -574,11 +574,17 @@ void main(){
   outLab.y = tgt.y + (lab.y - base.y)*uChroma;
   outLab.z = tgt.z + (lab.z - base.z)*uChroma;
   vec3 rgb = lab2rgb(outLab);
-  if(uHighlight>0.5 && best!=uSelected){
-    // push every non-selected yarn down to a flat, dark grey so the one selected yarn clearly stands
-    // out. A gentle desaturation left the whole pattern fully legible, which read as "nothing isolated".
-    float gy=dot(rgb,vec3(0.299,0.587,0.114));
-    rgb = vec3(gy*0.30 + 0.05);
+  if(uHighlight>0.5){
+    if(best==uSelected){
+      // the selected yarn: brighten and lift chroma so it pops even when it is a muted neutral grey
+      // (grey-on-grey was invisible). Keeps its own hue, just louder.
+      float gy=dot(rgb,vec3(0.299,0.587,0.114));
+      rgb = clamp(mix(vec3(gy), rgb, 1.35)*1.18 + 0.10, 0.0, 1.0);
+    } else {
+      // everything else: flat near-black grey so only the selected yarn reads
+      float gy=dot(rgb,vec3(0.299,0.587,0.114));
+      rgb = vec3(gy*0.22 + 0.03);
+    }
   }
   gl_FragColor=vec4(rgb,1.0);
 }`;
