@@ -46,7 +46,7 @@
   .appbar .spacer{flex:1;}
   .appbar .rugtag{
     /* centre over the rug/stage area, not the whole window (the 360px panel is on the right) */
-    position:absolute;left:calc((100% - 360px)/2);top:50%;transform:translate(-50%,-50%);
+    position:absolute;left:calc((100% - 440px)/2);top:50%;transform:translate(-50%,-50%);
     font-family:var(--serif);font-size:17px;color:var(--muted);
     text-align:center;line-height:1.3;white-space:nowrap;
   }
@@ -55,7 +55,7 @@
 
   main{
     display:grid;
-    grid-template-columns:minmax(0,1fr) 360px;
+    grid-template-columns:minmax(0,1fr) 440px;
     gap:0;
     height:calc(100vh - 123px);
   }
@@ -136,33 +136,38 @@
 
   .swatchlist{
     overflow-y:auto;flex:1;min-height:120px;
-    padding:8px 10px 10px;
+    padding:12px;
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(186px,1fr));
+    gap:10px;align-content:start;
   }
   .yarn{
-    display:flex;align-items:center;gap:12px;
-    padding:9px 10px;border-radius:12px;cursor:pointer;
-    border:1px solid transparent;
-    transition:background .12s,border-color .12s;
+    display:flex;align-items:center;gap:13px;
+    padding:10px 12px;border-radius:16px;cursor:pointer;
+    border:1px solid var(--line);background:#fff;
+    transition:background .12s,border-color .12s,box-shadow .12s;
   }
-  .yarn:hover{background:#f6f8f9;}
-  .yarn.sel{background:#eef5f8;border-color:#bfe0ee;}
+  .yarn:hover{background:#f6f8f9;border-color:var(--gold-soft);box-shadow:0 4px 12px rgba(20,45,60,.09);}
+  .yarn.sel{background:#eef5f8;border-color:#8fcbe4;box-shadow:inset 0 0 0 2px #bfe0ee;}
   .yarn .chip{
-    width:40px;height:40px;border-radius:9px;flex:0 0 auto;
-    border:1px solid rgba(0,0,0,.14);
-    box-shadow:inset 0 0 0 2px rgba(255,255,255,.35);
+    width:58px;height:58px;border-radius:50%;flex:0 0 auto;
+    border:1px solid rgba(0,0,0,.16);
+    box-shadow:inset 0 0 0 3px rgba(255,255,255,.4), 0 1px 4px rgba(0,0,0,.2);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .yarn .chip .chippct{
+    font-family:var(--sans);font-size:11.5px;font-weight:700;color:#fff;letter-spacing:.01em;
+    background:rgba(18,30,42,.46);border-radius:10px;padding:2px 6px;
+    text-shadow:0 1px 1px rgba(0,0,0,.4);
   }
   .yarn .meta{flex:1;min-width:0;}
-  .yarn .code{font-size:13px;font-weight:600;color:var(--ink);letter-spacing:.02em;}
+  .yarn .code{font-size:14px;font-weight:600;color:var(--ink);letter-spacing:.02em;}
   .yarn .desc{font-size:11.5px;color:var(--muted);}
-  .yarn .matsel{margin-top:3px;font-size:11.5px;color:var(--ink);font-family:var(--sans);border:1px solid var(--line);border-radius:7px;padding:2px 6px;background:#fff;cursor:pointer;max-width:96px;}
+  .yarn .matsel{margin-top:6px;font-size:12px;color:var(--ink);font-family:var(--sans);border:1px solid var(--line);border-radius:8px;padding:4px 8px;background:#fff;cursor:pointer;max-width:110px;}
   .yarn .matsel:hover{border-color:var(--gold-soft);}
   .yarn .matsel:focus{outline:none;border-color:var(--teal);}
-  .yarn .pct{
-    font-family:var(--serif);font-size:15px;color:var(--teal);font-weight:600;
-    flex:0 0 auto;min-width:46px;text-align:right;
-  }
+  .yarn .edited[hidden]{display:none;}
   .yarn .edited{
-    font-size:10px;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;
+    display:block;margin-top:2px;font-size:10px;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;
   }
 
   /* editor */
@@ -200,18 +205,18 @@
   }
   .arssearch:focus{outline:none;border-color:var(--teal);}
   .arsgrid{
-    display:grid;grid-template-columns:repeat(12,1fr);gap:4px;
-    max-height:168px;overflow-y:auto;padding:5px;border:1px solid var(--line);
+    display:grid;grid-template-columns:repeat(10,1fr);gap:5px;
+    max-height:340px;overflow-y:auto;padding:7px;border:1px solid var(--line);
     border-radius:10px;background:#e7ebee; /* tinted so pale/ivory swatches read as swatches, not a white "background" color */
   }
   .arsgrid button{
-    width:100%;aspect-ratio:1/1;border-radius:5px;border:1px solid rgba(0,0,0,.22);
+    width:100%;aspect-ratio:1/1;border-radius:6px;border:1px solid rgba(0,0,0,.22);
     cursor:pointer;padding:0;transition:transform .08s;position:relative;
   }
-  .arsgrid button:hover{transform:scale(1.22);z-index:2;box-shadow:0 2px 6px rgba(0,0,0,.25);}
+  .arsgrid button:hover{transform:scale(1.25);z-index:2;box-shadow:0 2px 7px rgba(0,0,0,.28);}
   .arsgrid button.on{outline:2px solid var(--teal);outline-offset:1px;}
   .arsempty{grid-column:1/-1;text-align:center;color:var(--muted);font-size:11.5px;padding:14px 0;}
-  @media (max-width:880px){ .arsgrid{grid-template-columns:repeat(10,1fr);} }
+  @media (max-width:880px){ .arsgrid{grid-template-columns:repeat(9,1fr);} }
   .editor .row{display:flex;align-items:center;gap:10px;}
   .editor input[type=color]{
     width:52px;height:38px;border:1px solid var(--line);border-radius:9px;
@@ -673,15 +678,15 @@ function buildPanel(){
     const el=document.createElement('div');
     el.className='yarn'; el.dataset.i=i;
     el.innerHTML=`
-      <div class="chip" style="background:${hex(c.baseRgb)}"></div>
+      <div class="chip" style="background:${hex(c.baseRgb)}"><span class="chippct">${c.pct.toFixed(1)}%</span></div>
       <div class="meta">
-        <div class="code">${codeFor(i)} <span class="edited" ${c.editedFlag?'':'hidden'} data-ed>changed</span></div>
+        <div class="code">${codeFor(i)}</div>
+        <span class="edited" ${c.editedFlag?'':'hidden'} data-ed>changed</span>
         <select class="matsel" aria-label="Material">
           <option value="Wool"${c.material==='Wool'?' selected':''}>Wool</option>
           <option value="Silkette"${c.material==='Silkette'?' selected':''}>Silkette</option>
         </select>
-      </div>
-      <div class="pct">${c.pct.toFixed(1)}%</div>`;
+      </div>`;
     el.addEventListener('click',()=>selectYarn(i));
     const sel=el.querySelector('.matsel');
     sel.addEventListener('click',e=>e.stopPropagation());
